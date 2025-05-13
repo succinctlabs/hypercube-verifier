@@ -1,0 +1,90 @@
+[workspace.package]
+version = "1.2.0"
+edition = "2021"
+repository = "https://github.com/succinctlabs/hypercube-verifier.git"
+keywords = ["sp1-hypercube", "succinct", "zero-knowledge"]
+categories = ["cryptography"]
+
+[workspace.lints.clippy]
+missing_docs = "warn"
+
+[workspace]
+members = [
+    "crates/basefold",
+    "crates/algebra",
+    "crates/sumcheck",
+    "crates/multilinear",
+    "crates/utils",
+    "crates/merkle-tree",
+    "crates/commit",
+    "crates/tensor",
+    "crates/alloc",
+    "crates/jagged",
+    "crates/stacked",
+    "crates/stark",
+    "crates/primitives",
+    "crates/derive",
+    "crates/recursion/machine",
+    "crates/recursion/derive",
+    "crates/recursion/executor", "cli",
+]
+resolver = "2"
+
+[profile.release]
+opt-level = 3
+
+[profile.bench]
+opt-level = 3
+
+[profile.fast]
+inherits = "release"
+debug = true
+debug-assertions = true
+
+[workspace.dependencies]
+p3-air = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-field = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-commit = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-matrix = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-baby-bear = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config", features = [
+    "nightly-features",
+] }
+p3-util = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-challenger = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-merkle-tree = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-poseidon2 = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-symmetric = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-uni-stark = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+
+
+#hypercube verifier
+hypercube-basefold = { path = "crates/basefold" }
+hypercube-algebra = { path = "crates/algebra" }
+hypercube-sumcheck = { path = "crates/sumcheck" }
+hypercube-multilinear = { path = "crates/multilinear" }
+hypercube-utils = { path = "crates/utils" }
+hypercube-merkle-tree = { path = "crates/merkle-tree" }
+hypercube-commit = { path = "crates/commit" }
+hypercube-tensor = { path = "crates/tensor" }
+hypercube-alloc = { path = "crates/alloc" }
+hypercube-jagged = { path = "crates/jagged" }
+hypercube-stacked = { path = "crates/stacked" }
+sp1-primitives = { path = "crates/primitives" }
+sp1-derive = { path = "crates/derive" }
+hypercube-stark = { path = "crates/stark" }
+hypercube-recursion-executor = { path = "crates/recursion/executor" }
+hypercube-recursion-machine = { path = "crates/recursion/machine" }
+
+# rayon
+rayon = "1.10.0"
+
+# misc
+thiserror = "1.0"
+itertools = "0.14.0"
+derive-where = "1.2.7"
+rand = "0.8"
+serde = { version = "1.0.217", features = ["derive"] }
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
+strum_macros = "0.27.1"
+strum = "0.27.1"

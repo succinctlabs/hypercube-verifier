@@ -1,0 +1,19 @@
+[package]
+name = "hypercube-sumcheck"
+version.workspace = true
+edition.workspace = true
+
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+p3-challenger = { workspace = true }
+
+hypercube-algebra = { workspace = true }
+p3-field = { workspace = true }
+hypercube-multilinear = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+

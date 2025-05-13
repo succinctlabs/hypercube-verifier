@@ -1,0 +1,20 @@
+[package]
+name = "hypercube-stacked"
+version.workspace = true
+edition.workspace = true
+
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+hypercube-multilinear = { workspace = true }
+hypercube-commit = { workspace = true }
+
+thiserror = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+
+[lints]
+workspace = true

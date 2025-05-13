@@ -1,0 +1,45 @@
+[package]
+name = "hypercube-stark"
+description = "SP1 is a performant, 100% open-source, contributor-friendly zkVM."
+readme = "../../README.md"
+version = { workspace = true }
+edition = { workspace = true }
+
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[dependencies]
+# sp1
+sp1-derive = { workspace = true }
+sp1-primitives = { workspace = true }
+
+hypercube-alloc = { workspace = true }
+hypercube-basefold = { workspace = true }
+hypercube-commit = { workspace = true }
+hypercube-jagged = { workspace = true }
+hypercube-sumcheck = { workspace = true }
+hypercube-multilinear = { workspace = true }
+hypercube-merkle-tree = { workspace = true }
+
+# p3
+p3-uni-stark = { workspace = true }
+p3-air = { workspace = true }
+p3-field = { workspace = true }
+p3-matrix = { workspace = true }
+p3-challenger = { workspace = true }
+p3-baby-bear = { workspace = true }
+p3-symmetric = { workspace = true }
+serde = { workspace = true, features = ["derive", "rc"] }
+itertools = { workspace = true }
+tracing = { workspace = true }
+thiserror = "1.0"
+derive-where = { workspace = true }
+
+arrayref = "0.3.8"
+num-bigint = { version = "0.4.3", default-features = false }
+strum_macros = { workspace = true }
+strum = {workspace = true }
+num-traits = "0.2.19"
+blake3 = { version = "1.6.1", default-features = false }
+sha2 = "0.10.8"

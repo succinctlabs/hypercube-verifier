@@ -1,0 +1,20 @@
+[package]
+name = "hypercube-recursion-executor"
+description = "SP1 is a performant, 100% open-source, contributor-friendly zkVM."
+readme = "../../../README.md"
+version = { workspace = true }
+edition = { workspace = true }
+
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[dependencies]
+p3-field = { workspace = true }
+p3-symmetric = { workspace = true }
+sp1-derive = { workspace = true }
+hypercube-stark = { workspace = true }
+p3-challenger = { workspace = true }
+hypercube-utils = { workspace = true }
+serde = { workspace = true, features = ["derive", "rc"] }
+static_assertions = "1.1.0"

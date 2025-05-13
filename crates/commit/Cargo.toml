@@ -1,0 +1,15 @@
+[package]
+name = "hypercube-commit"
+version.workspace = true
+edition.workspace = true
+
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+p3-commit = { workspace = true }
+
+hypercube-tensor = { workspace = true }
+hypercube-alloc = { workspace = true }
+serde = { workspace = true, features = ["rc"] }

@@ -1,0 +1,26 @@
+[package]
+name = "hypercube-merkle-tree"
+version.workspace = true
+edition.workspace = true
+
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+p3-merkle-tree = { workspace = true }
+
+hypercube-commit = { workspace = true }
+p3-symmetric = { workspace = true }
+p3-poseidon2 = { workspace = true }
+p3-baby-bear = { workspace = true }
+p3-field = { workspace = true }
+hypercube-tensor = { workspace = true }
+
+thiserror = { workspace = true }
+serde = { workspace = true }
+lazy_static = "1.5.0"
+itertools = { workspace = true }
+
+
+[dev-dependencies]

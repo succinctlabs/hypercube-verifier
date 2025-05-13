@@ -1,0 +1,23 @@
+[package]
+name = "hypercube-tensor"
+version.workspace = true
+edition.workspace = true
+
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+hypercube-alloc = { workspace = true }
+p3-matrix = { workspace = true }
+arrayvec = "0.7.6"
+rand = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+itertools = { workspace = true }
+derive-where = { workspace = true }
+
+[dev-dependencies]
+
+[lints]
+workspace = true

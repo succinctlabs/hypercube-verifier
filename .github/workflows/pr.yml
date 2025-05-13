@@ -1,0 +1,121 @@
+name: PR
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - "crates/**"
+      - "examples/**"
+      - "Cargo.toml"
+      - ".github/workflows/**"
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-x86:
+    name: Test (x86-64)
+    runs-on:
+      [
+        runs-on,
+        runner=64cpu-linux-x64,
+        spot=false,
+        "run-id=${{ github.run_id }}",
+      ]
+    env:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Setup CI
+        uses: ./.github/actions/setup
+        with:
+          pull_token: ${{ secrets.PRIVATE_PULL_TOKEN }}
+
+      - name: Run cargo check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          toolchain: 1.81.0
+          args: --all-targets --all-features
+
+      - name: Run cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          toolchain: 1.81.0
+          args: --release --workspace
+        env:
+          RUSTFLAGS: -Copt-level=3 -Cdebug-assertions -Coverflow-checks=y -Cdebuginfo=0 -C target-cpu=native
+          RUST_BACKTRACE: 1
+
+  test-arm:
+    name: Test (ARM)
+    runs-on:
+      [
+        runs-on,
+        runner=64cpu-linux-arm64,
+        spot=false,
+        "run-id=${{ github.run_id }}",
+      ]
+    env:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Setup CI
+        uses: ./.github/actions/setup
+        with:
+          pull_token: ${{ secrets.PRIVATE_PULL_TOKEN }}
+
+      - name: Run cargo check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          toolchain: 1.81.0
+          args: --all-targets --all-features
+
+      - name: Run cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          toolchain: 1.81.0
+          args: --release --workspace 
+        env:
+          RUSTFLAGS: -Copt-level=3 -Cdebug-assertions -Coverflow-checks=y -Cdebuginfo=0 -C target-cpu=native
+          RUST_BACKTRACE: 1
+
+  lint:
+    name: Formatting & Clippy
+    runs-on: [runs-on, runner=8cpu-linux-x64, "run-id=${{ github.run_id }}"]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Setup CI
+        uses: ./.github/actions/setup
+        with:
+          pull_token: ${{ secrets.PRIVATE_PULL_TOKEN }}
+        
+      - name: Run cargo fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+        env:
+          CARGO_INCREMENTAL: 1
+
+      - name: Run cargo clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --all-features --all-targets -- -D warnings -A incomplete-features
+        env:
+          CARGO_INCREMENTAL: 1

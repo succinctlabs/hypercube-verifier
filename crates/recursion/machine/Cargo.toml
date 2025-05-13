@@ -1,0 +1,33 @@
+[package]
+name = "hypercube-recursion-machine"
+description = "SP1 is a performant, 100% open-source, contributor-friendly zkVM."
+readme = "../../../README.md"
+version = { workspace = true }
+edition = { workspace = true }
+
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[dependencies]
+sp1-derive = { workspace = true }
+sp1-primitives = { workspace = true }
+hypercube-stark = { workspace = true }
+hypercube-recursion-executor = { workspace = true }
+
+p3-air = { workspace = true }
+p3-matrix = { workspace = true }
+hypercube-utils = { workspace = true }
+p3-baby-bear = { workspace = true }
+hypercube-jagged = { workspace = true }
+p3-poseidon2 = { workspace = true }
+p3-field = { workspace = true }
+itertools = { workspace = true }
+serde = { workspace = true, features = ["derive", "rc"] }
+strum_macros = { workspace = true }
+strum = {workspace = true }
+thiserror = { workspace = true }
+
+
+[lints]
+workspace = true

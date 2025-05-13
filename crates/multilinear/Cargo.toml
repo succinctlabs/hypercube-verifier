@@ -1,0 +1,23 @@
+[package]
+name = "hypercube-multilinear"
+version.workspace = true
+edition.workspace = true
+
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+hypercube-alloc = { workspace = true }
+hypercube-tensor = { workspace = true }
+p3-field = { workspace = true }
+p3-matrix = { workspace = true }
+p3-challenger = { workspace = true }
+
+serde = { workspace = true }
+rayon = { workspace = true }
+derive-where = { workspace = true }
+rand = { workspace = true }
+
+[dev-dependencies]
+rand = { workspace = true }

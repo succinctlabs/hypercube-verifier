@@ -1,0 +1,23 @@
+[package]
+name = "hypercube-jagged"
+version.workspace = true
+edition.workspace = true
+
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+hypercube-multilinear = { workspace = true }
+p3-baby-bear = { workspace = true }
+hypercube-sumcheck = { workspace = true }
+p3-field = { workspace = true }
+p3-challenger = { workspace = true }
+hypercube-stacked = { workspace = true }
+hypercube-basefold = { workspace = true }
+rayon = "1.5.0"
+serde = { workspace = true, features = ["rc"] }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+p3-baby-bear = { workspace = true }

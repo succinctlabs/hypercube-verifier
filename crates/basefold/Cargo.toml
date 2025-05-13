@@ -1,0 +1,26 @@
+[package]
+name = "hypercube-basefold"
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+p3-field = { workspace = true }
+hypercube-multilinear = { workspace = true }
+p3-challenger = { workspace = true }
+hypercube-utils = { workspace = true }
+hypercube-commit = { workspace = true }
+hypercube-tensor = { workspace = true }
+hypercube-alloc = { workspace = true }
+p3-baby-bear = { workspace = true }
+hypercube-merkle-tree = { workspace = true }
+
+thiserror = "1.0"
+itertools = "0.12.0"
+serde = { version = "1.0.207", features = ["derive"] }
+derive-where = { workspace = true }
+
+[dev-dependencies]
+p3-baby-bear = { workspace = true }

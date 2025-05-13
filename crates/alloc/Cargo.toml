@@ -1,0 +1,17 @@
+[package]
+name = "hypercube-alloc"
+version.workspace = true
+edition.workspace = true
+
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+p3-field = { workspace = true }
+
+thiserror = { workspace = true }
+serde = { workspace = true }
+
+[lints]
+workspace = true
