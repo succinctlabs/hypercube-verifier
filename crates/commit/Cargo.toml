@@ -1,0 +1,16 @@
+[package]
+name = "slop-commit"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+p3-commit = { workspace = true }
+# slop-futures = { workspace = true }
+
+slop-tensor = { workspace = true }
+slop-alloc = { workspace = true }
+serde = { workspace = true, features = ["rc"] }

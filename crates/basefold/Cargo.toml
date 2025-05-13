@@ -1,0 +1,34 @@
+[package]
+name = "slop-basefold"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+slop-algebra = { workspace = true }
+p3-field = { workspace = true }
+slop-multilinear = { workspace = true }
+p3-maybe-rayon = { workspace = true }
+p3-challenger = { workspace = true }
+slop-utils = { workspace = true }
+slop-commit = { workspace = true }
+p3-matrix = { workspace = true }
+slop-tensor = { workspace = true }
+slop-alloc = { workspace = true }
+p3-baby-bear = { workspace = true }
+p3-symmetric = { workspace = true }
+p3-poseidon2 = { workspace = true }
+slop-merkle-tree = { workspace = true }
+p3-bn254-fr = { workspace = true }
+
+thiserror = "1.0"
+itertools = "0.12.0"
+rand = "0.8.5"
+serde = { version = "1.0.207", features = ["derive"] }
+derive-where = { workspace = true }
+
+[dev-dependencies]
+p3-baby-bear = { workspace = true }

@@ -1,0 +1,88 @@
+[workspace.package]
+version = "1.2.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/succinctlabs/hypercube-verifier.git"
+keywords = ["sp1-hypercube", "succinct", "zero-knowledge"]
+categories = ["cryptography"]
+
+[workspace.lints.clippy]
+missing_docs = "warn"
+
+[workspace]
+members = [
+    "crates/basefold",
+    "crates/algebra",
+    "crates/sumcheck",
+    "crates/multilinear",
+    "crates/utils",
+    "crates/merkle-tree",
+    "crates/commit",
+    "crates/tensor",
+    "crates/alloc",
+    "crates/jagged",
+    "crates/stacked",
+]
+resolver = "2"
+
+[profile.release]
+opt-level = 3
+
+[profile.bench]
+opt-level = 3
+
+[profile.fast]
+inherits = "release"
+debug = true
+debug-assertions = true
+
+[workspace.dependencies]
+p3-air = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-bn254-fr = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-field = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-commit = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-matrix = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-baby-bear = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config", features = [
+    "nightly-features",
+] }
+p3-util = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-challenger = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-dft = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-maybe-rayon = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config", features = [
+    "parallel",
+] }
+p3-merkle-tree = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-poseidon2 = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-symmetric = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-fri = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+
+
+#hypercube verifier
+slop-basefold = { path = "crates/basefold" }
+slop-algebra = { path = "crates/algebra" }
+slop-sumcheck = { path = "crates/sumcheck" }
+slop-multilinear = { path = "crates/multilinear" }
+slop-utils = { path = "crates/utils" }
+slop-merkle-tree = { path = "crates/merkle-tree" }
+slop-commit = { path = "crates/commit" }
+slop-tensor = { path = "crates/tensor" }
+slop-alloc = { path = "crates/alloc" }
+slop-jagged = { path = "crates/jagged" }
+slop-stacked = { path = "crates/stacked" }
+
+# rayon
+rayon = "1.10.0"
+
+# misc
+thiserror = "1.0"
+itertools = "0.14.0"
+derive-where = "1.2.7"
+rand = "0.8"
+serde = { version = "1.0.217", features = ["derive"] }
+tracing = "0.1.40"
+serde_json = "1.0"
+futures = "0.3.31"
+num_cpus = "1.16.0"
+
+# async
+tokio = { version = "1.42.0", features = ["full"] }

@@ -1,0 +1,14 @@
+[package]
+name = "slop-utils"
+serde = "1.0"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+tracing-forest = { version = "0.1.6", features = ["ansi", "smallvec"] }
+tracing-subscriber = { version = "0.3.18", features = ["std", "env-filter"] }
+p3-util = {workspace = true}

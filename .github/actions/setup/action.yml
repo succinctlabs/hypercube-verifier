@@ -1,0 +1,34 @@
+name: Test setup
+inputs:
+  pull_token:
+    description: "Token to use for private repo access"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Set up git private repo access
+      shell: bash
+      run: |
+        git config --global url."https://${{ inputs.pull_token }}@github.com/".insteadOf ssh://git@github.com
+        git config --global url."https://${{ inputs.pull_token }}@github.com".insteadOf https://github.com
+
+    - name: rust-cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+          ~/.rustup/
+        key: rust-1.81.0-${{ hashFiles('**/Cargo.toml') }}
+        restore-keys: rust-1.81.0-
+
+    - name: Setup toolchain
+      id: rustc-toolchain
+      shell: bash
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain 1.81.0 -y
+        . "$HOME/.cargo/env" 
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
