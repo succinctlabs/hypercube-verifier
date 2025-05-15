@@ -1,0 +1,55 @@
+[package]
+name = "hypercube-recursion-machine"
+description = "SP1 is a performant, 100% open-source, contributor-friendly zkVM."
+readme = "../../../README.md"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[dependencies]
+# sp1-core-machine = { workspace = true }
+sp1-derive = { workspace = true }
+sp1-primitives = { workspace = true }
+# sp1-recursion-executor = { workspace = true, features = ["program_validation"] }
+hypercube-stark = { workspace = true }
+hypercube-recursion-executor = { workspace = true }
+
+p3-air = { workspace = true }
+p3-util = { workspace = true }
+p3-matrix = { workspace = true }
+
+slop-algebra = { workspace = true }
+slop-utils = { workspace = true }
+p3-baby-bear = { workspace = true }
+slop-jagged = { workspace = true }
+p3-maybe-rayon = { workspace = true }
+p3-merkle-tree = { workspace = true }
+p3-poseidon2 = { workspace = true }
+p3-symmetric = { workspace = true }
+p3-field = { workspace = true }
+
+hashbrown = { workspace = true, features = ["serde"] }
+itertools = { workspace = true }
+serde = { workspace = true, features = ["derive", "rc"] }
+strum = { workspace = true }
+strum_macros = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+rand = "0.8.5"
+zkhash = "0.2.0"
+thiserror = { workspace = true }
+bincode = "1.3.3"
+
+
+
+[dev-dependencies]
+serde_json = { workspace = true }
+# sp1-recursion-executor = { workspace = true, features = ["program_validation"] }
+
+
+
+[lints]
+workspace = true

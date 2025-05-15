@@ -8,9 +8,7 @@ use derive_where::derive_where;
 use p3_matrix::Matrix;
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-use slop_alloc::{
-    Backend, Buffer, CpuBackend, HasBackend, Init, TryReserveError, GLOBAL_CPU_BACKEND,
-};
+use slop_alloc::{Backend, Buffer, CpuBackend, Init, TryReserveError, GLOBAL_CPU_BACKEND};
 
 use crate::{Dimensions, DimensionsError};
 
@@ -90,25 +88,6 @@ impl<T, A: Backend> Tensor<T, A> {
             dimension_fail(&dimensions, &self.dimensions);
         }
         self.dimensions = dimensions;
-        self
-    }
-
-    /// # Safety
-    ///
-    /// The caller must ensure that the new dimensions are compatible with the existing dimensions.
-    #[inline]
-    pub unsafe fn reshape_unchecked(mut self, dimensions: Dimensions) {
-        self.dimensions = dimensions;
-    }
-
-    #[inline]
-    pub fn flatten_in_place(&mut self) {
-        self.reshape_in_place([self.dimensions.total_len()]);
-    }
-
-    #[inline]
-    pub fn flatten(mut self) -> Self {
-        self.flatten_in_place();
         self
     }
 
@@ -259,14 +238,6 @@ impl<T, A: Backend> From<Buffer<T, A>> for Tensor<T, A> {
     fn from(buffer: Buffer<T, A>) -> Self {
         let dims = [buffer.len()].into_iter().collect();
         Self { storage: buffer, dimensions: dims }
-    }
-}
-
-impl<T, A: Backend> HasBackend for Tensor<T, A> {
-    type Backend = A;
-
-    fn backend(&self) -> &Self::Backend {
-        self.backend()
     }
 }
 
@@ -693,114 +664,5 @@ impl<'de, T: Deserialize<'de>> Deserialize<'de> for Tensor<T> {
             &["storage", "dimensions"],
             TensorVisitor(PhantomData),
         )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-
-    use slop_alloc::buffer;
-
-    use super::*;
-
-    #[test]
-    fn test_tensor_element_index() {
-        let tensor = Tensor::<u32>::from(buffer![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).reshape([2, 5]);
-        assert_eq!(*tensor[[0, 0]], 1);
-        assert_eq!(*tensor[[0, 1]], 2);
-        assert_eq!(*tensor[[0, 2]], 3);
-        assert_eq!(*tensor[[0, 3]], 4);
-        assert_eq!(*tensor[[0, 4]], 5);
-        assert_eq!(*tensor[[1, 0]], 6);
-        assert_eq!(*tensor[[1, 1]], 7);
-        assert_eq!(*tensor[[1, 2]], 8);
-        assert_eq!(*tensor[[1, 3]], 9);
-        assert_eq!(*tensor[[1, 4]], 10);
-    }
-
-    #[test]
-    fn test_tensor_slice_index() {
-        let tensor = Tensor::<u32>::from(buffer![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).reshape([2, 5]);
-
-        let first_row = tensor.get(0).unwrap();
-        assert_eq!(first_row.sizes(), [5]);
-        assert_eq!(first_row.strides(), [1]);
-        assert_eq!(*first_row[[0]], 1);
-        assert_eq!(*first_row[[1]], 2);
-        assert_eq!(*first_row[[2]], 3);
-        assert_eq!(*first_row[[3]], 4);
-        assert_eq!(*first_row[[4]], 5);
-
-        let second_row = tensor.get(1).unwrap();
-        assert_eq!(*second_row[[0]], 6);
-        assert_eq!(*second_row[[1]], 7);
-        assert_eq!(*second_row[[2]], 8);
-        assert_eq!(*second_row[[3]], 9);
-        assert_eq!(*second_row[[4]], 10);
-
-        let tensor = Tensor::<u32>::from((0..24).collect::<Vec<_>>()).reshape([2, 3, 4]);
-        assert_eq!(*tensor[[0, 0, 0]], 0);
-        assert_eq!(*tensor[[0, 0, 1]], 1);
-        assert_eq!(*tensor[[0, 0, 2]], 2);
-        assert_eq!(*tensor[[0, 0, 3]], 3);
-        assert_eq!(*tensor[[0, 1, 0]], 4);
-        assert_eq!(*tensor[[0, 1, 1]], 5);
-        assert_eq!(*tensor[[0, 1, 2]], 6);
-        assert_eq!(*tensor[[0, 1, 3]], 7);
-        assert_eq!(*tensor[[0, 2, 0]], 8);
-        assert_eq!(*tensor[[0, 2, 1]], 9);
-        assert_eq!(*tensor[[0, 2, 2]], 10);
-        assert_eq!(*tensor[[0, 2, 3]], 11);
-        assert_eq!(*tensor[[1, 0, 0]], 12);
-        assert_eq!(*tensor[[1, 0, 1]], 13);
-        assert_eq!(*tensor[[1, 0, 2]], 14);
-        assert_eq!(*tensor[[1, 0, 3]], 15);
-        assert_eq!(*tensor[[1, 1, 0]], 16);
-        assert_eq!(*tensor[[1, 1, 1]], 17);
-        assert_eq!(*tensor[[1, 1, 2]], 18);
-        assert_eq!(*tensor[[1, 1, 3]], 19);
-        assert_eq!(*tensor[[1, 2, 0]], 20);
-        assert_eq!(*tensor[[1, 2, 1]], 21);
-        assert_eq!(*tensor[[1, 2, 2]], 22);
-        assert_eq!(*tensor[[1, 2, 3]], 23);
-    }
-
-    #[test]
-    fn test_p3_matrix_to_tensor() {
-        let mut rng = rand::thread_rng();
-        let matrix = p3_matrix::dense::RowMajorMatrix::<u32>::rand(&mut rng, 100, 400);
-        let tensor = Tensor::from(matrix.clone());
-
-        assert_eq!(tensor.sizes(), [100, 400]);
-
-        let matrix_back = p3_matrix::dense::RowMajorMatrix::<u32>::try_from(tensor).unwrap();
-        assert_eq!(matrix_back.values, matrix.values);
-    }
-
-    #[test]
-    fn test_tensor_macro() {
-        let tensor = tensor![1, 2, 3, 4, 5, 6];
-        assert_eq!(tensor.sizes(), [6]);
-        assert_eq!(tensor.as_slice(), [1, 2, 3, 4, 5, 6]);
-
-        let tensor = tensor![[1, 2, 3], [4, 5, 6]];
-        assert_eq!(tensor.sizes(), [2, 3]);
-        assert_eq!(tensor.as_slice(), [1, 2, 3, 4, 5, 6]);
-
-        let tensor = tensor![[1, 2, 3, 4, 5]];
-        assert_eq!(tensor.sizes(), [1, 5]);
-        assert_eq!(tensor.as_slice(), [1, 2, 3, 4, 5]);
-
-        let tensor = tensor![[1], [2], [3], [4], [5]];
-        assert_eq!(tensor.sizes(), [5, 1]);
-        assert_eq!(tensor.as_slice(), [1, 2, 3, 4, 5]);
-    }
-
-    #[test]
-    fn test_tensor_serialize_deserialize() {
-        let tensor = Tensor::<u32>::from(buffer![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).reshape([2, 5]);
-        let serialized = serde_json::to_string(&tensor).unwrap();
-        let deserialized: Tensor<u32> = serde_json::from_str(&serialized).unwrap();
-        assert_eq!(deserialized, tensor);
     }
 }

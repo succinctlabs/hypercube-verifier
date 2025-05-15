@@ -1,6 +1,6 @@
 use std::future::Future;
 
-use slop_algebra::Field;
+use p3_field::Field;
 use slop_alloc::Backend;
 use slop_commit::Message;
 use slop_multilinear::Mle;

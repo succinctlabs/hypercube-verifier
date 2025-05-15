@@ -22,6 +22,14 @@ members = [
     "crates/alloc",
     "crates/jagged",
     "crates/stacked",
+    "crates/stark",
+    "crates/primitives",
+    "crates/derive",
+    "crates/recursion/circuit",
+    "crates/recursion/compiler",
+    "crates/recursion/machine",
+    "crates/recursion/derive",
+    "crates/recursion/executor",
 ]
 resolver = "2"
 
@@ -55,6 +63,7 @@ p3-merkle-tree = { git = "https://github.com/erabinov/Plonky3/", branch = "clone
 p3-poseidon2 = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
 p3-symmetric = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
 p3-fri = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
+p3-uni-stark = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
 
 
 #hypercube verifier
@@ -69,6 +78,14 @@ slop-tensor = { path = "crates/tensor" }
 slop-alloc = { path = "crates/alloc" }
 slop-jagged = { path = "crates/jagged" }
 slop-stacked = { path = "crates/stacked" }
+sp1-primitives = { path = "crates/primitives" }
+sp1-derive = { path = "crates/derive" }
+hypercube-stark = { path = "crates/stark" }
+hypercube-recursion-circuit = { path = "crates/recursion/circuit" }
+hypercube-recursion-compiler = { path = "crates/recursion/compiler" }
+hypercube-recursion-machine = { path = "crates/recursion/machine" }
+hypercube-recursion-derive = { path = "crates/recursion/derive" }
+hypercube-recursion-executor = { path = "crates/recursion/executor" }
 
 # rayon
 rayon = "1.10.0"
@@ -83,6 +100,11 @@ tracing = "0.1.40"
 serde_json = "1.0"
 futures = "0.3.31"
 num_cpus = "1.16.0"
+hashbrown = "0.14.5"
+tracing-subscriber = "0.3.18"
+strum_macros = "0.27.1"
+strum = "0.27.1"
+blake3 = { version = "1.6.1", default-features = false }
 
 # async
 tokio = { version = "1.42.0", features = ["full"] }

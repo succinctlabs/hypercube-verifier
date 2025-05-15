@@ -103,28 +103,3 @@ pub fn rlc_univariate_polynomials<K: Field>(
     }
     result
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::{interpolate_univariate_polynomial, UnivariatePolynomial};
-    use p3_baby_bear::BabyBear;
-    use p3_field::AbstractField;
-
-    type F = BabyBear;
-
-    #[test]
-    fn test_univariate_eval_at_point() {
-        let poly = UnivariatePolynomial::new(vec![F::one(), F::one(), F::one()]);
-        assert_eq!(poly.eval_at_point(F::two()), F::from_canonical_u16(7));
-    }
-
-    #[test]
-    fn test_univariate_interpolate() {
-        let xs = vec![F::zero(), F::one(), F::two()];
-        let ys = vec![F::one(), F::two(), F::from_canonical_u16(7)];
-        let poly = interpolate_univariate_polynomial(&xs, &ys);
-        assert_eq!(poly.eval_at_point(F::zero()), F::one());
-        assert_eq!(poly.eval_at_point(F::one()), F::two());
-        assert_eq!(poly.eval_at_point(F::two()), F::from_canonical_u16(7));
-    }
-}

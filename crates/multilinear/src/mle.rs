@@ -92,10 +92,10 @@ impl<F, A: Backend> Mle<F, A> {
     }
 
     /// # Safety
-    #[inline]
-    pub unsafe fn assume_init(&mut self) {
-        self.guts.assume_init();
-    }
+    // #[inline]
+    // pub unsafe fn assume_init(&mut self) {
+    //     self.guts.assume_init();
+    // }
 
     /// Returns the number of polynomials in the batch.
     #[inline]
@@ -304,17 +304,17 @@ impl<T> Mle<T, CpuBackend> {
     }
 }
 
-impl<T: AbstractField + Send + Sync> TryInto<p3_matrix::dense::RowMajorMatrix<T>>
-    for Mle<T, CpuBackend>
-{
-    type Error = ();
+// impl<T: AbstractField + Send + Sync> TryInto<p3_matrix::dense::RowMajorMatrix<T>>
+//     for Mle<T, CpuBackend>
+// {
+//     type Error = ();
 
-    fn try_into(self) -> Result<p3_matrix::dense::RowMajorMatrix<T>, Self::Error> {
-        let num_polys = self.num_polynomials();
-        let values = self.guts.into_buffer().to_vec();
-        Ok(p3_matrix::dense::RowMajorMatrix::new(values, num_polys))
-    }
-}
+//     fn try_into(self) -> Result<p3_matrix::dense::RowMajorMatrix<T>, Self::Error> {
+//         let num_polys = self.num_polynomials();
+//         let values = self.guts.into_buffer().to_vec();
+//         Ok(p3_matrix::dense::RowMajorMatrix::new(values, num_polys))
+//     }
+// }
 
 impl<T> From<Vec<T>> for Mle<T, CpuBackend> {
     fn from(values: Vec<T>) -> Self {
