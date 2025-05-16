@@ -8,9 +8,7 @@ use derive_where::derive_where;
 use p3_field::AbstractField;
 use rand::{distributions::Standard, prelude::Distribution};
 use serde::{Deserialize, Serialize};
-use slop_alloc::{
-    buffer, Backend, Buffer, CanCopyFromRef, CanCopyIntoRef, CpuBackend, HasBackend, Init, Slice,
-};
+use slop_alloc::{buffer, Backend, Buffer, CpuBackend, HasBackend, Init, Slice};
 use slop_tensor::Tensor;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -230,15 +228,6 @@ impl<T> Point<T, CpuBackend> {
     }
 }
 
-// impl<T> Debug for Point<T, CpuBackend>
-// where
-//     T: Debug,
-// {
-//     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-//         write!(f, "Point({:?})", self.values.as_slice())
-//     }
-// }
-
 impl<T> From<Vec<T>> for Point<T, CpuBackend> {
     fn from(values: Vec<T>) -> Self {
         Self::new(Buffer::from(values))
@@ -279,16 +268,4 @@ impl<T, A: Backend> HasBackend for Point<T, A> {
     fn backend(&self) -> &Self::Backend {
         self.values.allocator()
     }
-}
-
-pub trait PointBackend<T>:
-    CanCopyFromRef<Point<T>, CpuBackend, Output = Point<T, Self>>
-    + CanCopyIntoRef<Point<T, Self>, CpuBackend, Output = Point<T>>
-{
-}
-
-impl<T, A> PointBackend<T> for A where
-    A: CanCopyFromRef<Point<T>, CpuBackend, Output = Point<T, Self>>
-        + CanCopyIntoRef<Point<T, A>, CpuBackend, Output = Point<T>>
-{
 }

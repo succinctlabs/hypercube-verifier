@@ -373,8 +373,6 @@ impl<C: MachineConfig, A: MachineAir<C::F>> ShardVerifier<C, A> {
 
         let degrees = opened_values.chips.iter().map(|x| x.degree.clone()).collect::<Vec<_>>();
 
-        println!("Verify logup GKR proof");
-
         // Verify the logup GKR proof.
         LogUpGkrVerifier::<_, _, A>::verify_logup_gkr(
             &shard_chips,
@@ -387,8 +385,6 @@ impl<C: MachineConfig, A: MachineAir<C::F>> ShardVerifier<C, A> {
             challenger,
         )
         .map_err(ShardVerifierError::GkrVerificationFailed)?;
-
-        println!("Verify zerocheck proof");
 
         // Verify the zerocheck proof.
         self.verify_zerocheck(
@@ -449,8 +445,6 @@ impl<C: MachineConfig, A: MachineAir<C::F>> ShardVerifier<C, A> {
         };
         let machine_jagged_verifier =
             MachineJaggedPcsVerifier::new(&self.pcs_verifier, column_counts);
-
-        println!("Verify pcs proof");
 
         machine_jagged_verifier
             .verify_trusted_evaluations(

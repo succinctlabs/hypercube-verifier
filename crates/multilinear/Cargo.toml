@@ -10,27 +10,14 @@ categories.workspace = true
 [dependencies]
 slop-alloc = { workspace = true }
 slop-tensor = { workspace = true }
-# slop-futures = { workspace = true }
-slop-commit = { workspace = true }
-# p3-baby-bear = { workspace = true }
-
-slop-algebra = { workspace = true }
 p3-field = { workspace = true }
 p3-matrix = { workspace = true }
 p3-challenger = { workspace = true }
-slop-utils = { workspace = true }
-p3-maybe-rayon = { workspace = true }
 
 serde = { workspace = true }
 rayon = { workspace = true }
-tracing = "0.1.0"
 derive-where = { workspace = true }
 rand = { workspace = true }
-tokio = { workspace = true }
-futures = { workspace = true }
-num_cpus = { workspace = true }
 
 [dev-dependencies]
-p3-baby-bear = { workspace = true }
 rand = { workspace = true }
-serde_json = { workspace = true }

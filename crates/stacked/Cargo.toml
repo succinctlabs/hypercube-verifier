@@ -10,26 +10,13 @@ categories.workspace = true
 [dependencies]
 slop-multilinear = { workspace = true }
 slop-alloc = { workspace = true }
-# slop-futures = { workspace = true }
-slop-tensor = { workspace = true }
-slop-algebra = { workspace = true }
 p3-field = { workspace = true }
 slop-commit = { workspace = true }
 
 thiserror = { workspace = true }
-derive-where = { workspace = true }
 serde = { workspace = true }
-tokio = { workspace = true }
-futures = { workspace = true }
-rayon = { workspace = true }
 
 [dev-dependencies]
-# slop-basefold-prover = { workspace = true }
-slop-basefold = { workspace = true }
-p3-baby-bear = { workspace = true }
-p3-challenger = { workspace = true }
-
-rand = { workspace = true }
 
 [lints]
 workspace = true

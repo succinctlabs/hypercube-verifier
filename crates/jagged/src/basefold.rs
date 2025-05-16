@@ -2,24 +2,15 @@ use p3_baby_bear::BabyBear;
 use serde::{Deserialize, Serialize};
 use slop_basefold::{
     BasefoldConfig, BasefoldProof, BasefoldVerifier, DefaultBasefoldConfig,
-    Poseidon2BabyBear16BasefoldConfig, Poseidon2Bn254FrBasefoldConfig,
+    Poseidon2BabyBear16BasefoldConfig,
 };
 use slop_stacked::StackedPcsVerifier;
 use std::fmt::Debug;
 
-use crate::{
-    JaggedConfig, JaggedEvalConfig, JaggedEvalSumcheckConfig, JaggedPcsVerifier,
-    TrivialJaggedEvalConfig,
-};
+use crate::{JaggedConfig, JaggedEvalConfig, JaggedEvalSumcheckConfig, JaggedPcsVerifier};
 
 pub type BabyBearPoseidon2 =
     JaggedBasefoldConfig<Poseidon2BabyBear16BasefoldConfig, JaggedEvalSumcheckConfig<BabyBear>>;
-
-pub type Bn254JaggedConfig =
-    JaggedBasefoldConfig<Poseidon2Bn254FrBasefoldConfig, JaggedEvalSumcheckConfig<BabyBear>>;
-
-pub type BabyBearPoseidon2TrivialEval =
-    JaggedBasefoldConfig<Poseidon2BabyBear16BasefoldConfig, TrivialJaggedEvalConfig>;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct JaggedBasefoldConfig<BC, E>(BC, E);

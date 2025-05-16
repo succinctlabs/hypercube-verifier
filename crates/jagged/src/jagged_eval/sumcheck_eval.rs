@@ -63,8 +63,6 @@ where
         // Verify the jagged eval proof.
         let result = partially_verify_sumcheck_proof(partial_sumcheck_proof, challenger);
         if let Err(result) = result {
-            println!("Sumcheck proof verification failed");
-            println!("Sumcheck error: {:?}", result);
             return Err(JaggedEvalSumcheckError::SumcheckError(result));
         }
         let (first_half_z_index, second_half_z_index) = partial_sumcheck_proof

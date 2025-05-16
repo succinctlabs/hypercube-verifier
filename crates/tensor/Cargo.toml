@@ -9,23 +9,15 @@ categories.workspace = true
 
 [dependencies]
 slop-alloc = { workspace = true }
-slop-algebra = { workspace = true }
 p3-matrix = { workspace = true }
-p3-field = { workspace = true }
-
-rayon = { workspace = true }
-transpose = "0.2.3"
 arrayvec = "0.7.6"
 rand = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 itertools = { workspace = true }
 derive-where = { workspace = true }
-tokio = { workspace = true }
 
 [dev-dependencies]
-p3-baby-bear = { workspace = true }
-serde_json = { workspace = true }
 
 [lints]
 workspace = true

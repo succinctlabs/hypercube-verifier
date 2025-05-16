@@ -153,30 +153,3 @@ pub fn verify_compressed(
 
     Ok(())
 }
-
-#[cfg(test)]
-mod tests {
-    use std::fs::File;
-
-    use super::*;
-
-    #[test]
-    fn test_verify_compress() {
-        println!("current dir: {:?}", std::env::current_dir());
-
-        let path = "proof.bin";
-
-        let mut file = File::open(path).unwrap();
-
-        let proof: SP1ProofWithPublicValues = bincode::deserialize_from(&mut file).unwrap();
-
-        let proof = proof.proof;
-        let proof = match proof {
-            SP1Proof::Compressed(proof) => proof,
-            _ => panic!("not a compressed proof"),
-        };
-        let result = verify_compressed(&proof);
-
-        assert!(result.is_ok(), "Failed to verify compressed proof");
-    }
-}

@@ -1,8 +1,6 @@
 mod sumcheck_eval;
-mod trivial_eval;
 
 pub use sumcheck_eval::*;
-pub use trivial_eval::*;
 
 use std::{error::Error, fmt::Debug};
 

@@ -14,9 +14,6 @@ categories = { workspace = true }
 sp1-derive = { workspace = true }
 sp1-primitives = { workspace = true }
 
-# slop
-slop-algebra = { workspace = true }
-
 # p3-air = { workspace = true }
 slop-alloc = { workspace = true }
 slop-basefold = { workspace = true }
@@ -24,7 +21,6 @@ slop-basefold = { workspace = true }
 slop-commit = { workspace = true }
 slop-jagged = { workspace = true }
 slop-sumcheck = { workspace = true }
-slop-tensor = { workspace = true }
 slop-multilinear = { workspace = true }
 # slop-challenger = { workspace = true }
 # slop-matrix = { workspace = true }
@@ -38,34 +34,19 @@ p3-uni-stark = { workspace = true }
 p3-air = { workspace = true }
 p3-field = { workspace = true }
 p3-matrix = { workspace = true }
-p3-util = { workspace = true }
 p3-challenger = { workspace = true }
-p3-commit = { workspace = true }
-p3-maybe-rayon = { workspace = true, features = ["parallel"] }
 p3-baby-bear = { workspace = true }
-p3-dft = { workspace = true }
-p3-fri = { workspace = true }
-p3-merkle-tree = { workspace = true }
 p3-symmetric = { workspace = true }
-p3-poseidon2 = { workspace = true }
-
-# misc
-futures = { workspace = true }
-# futures-util = { workspace = true }
 serde = { workspace = true, features = ["derive", "rc"] }
 hashbrown = { version = "0.14.5", features = ["serde", "inline-more"] }
 itertools = { workspace = true }
 tracing = { workspace = true }
-rayon-scan = "0.1.1"
-rayon = "1.5.0"
 thiserror = "1.0"
 derive-where = { workspace = true }
 
 arrayref = "0.3.8"
 num-bigint = { version = "0.4.3", default-features = false }
-
-strum = { workspace = true }
 strum_macros = { workspace = true }
+strum = {workspace = true }
 num-traits = "0.2.19"
-num_cpus = "1.16.0"
 

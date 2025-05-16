@@ -8,7 +8,6 @@ use p3_poseidon2::{Poseidon2, Poseidon2ExternalMatrixGeneral};
 
 pub mod consts;
 pub mod io;
-pub mod polynomial;
 pub mod types;
 
 lazy_static! {
@@ -1152,17 +1151,4 @@ lazy_static! {
         8,
         8,
     > = poseidon2_hasher();
-}
-
-/// Append a single deferred proof to a hash chain of deferred proofs.
-pub fn hash_deferred_proof(
-    prev_digest: &[BabyBear; 8],
-    vk_digest: &[BabyBear; 8],
-    pv_digest: &[BabyBear; 32],
-) -> [BabyBear; 8] {
-    let mut inputs = Vec::with_capacity(48);
-    inputs.extend_from_slice(prev_digest);
-    inputs.extend_from_slice(vk_digest);
-    inputs.extend_from_slice(pv_digest);
-    poseidon2_hash(inputs.to_vec())
 }

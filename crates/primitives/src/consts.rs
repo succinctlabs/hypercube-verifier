@@ -75,45 +75,45 @@ pub fn words_to_bytes_le_vec(words: &[u32]) -> Vec<u8> {
     words.iter().flat_map(|word| word.to_le_bytes().into_iter()).collect::<Vec<_>>()
 }
 
-/// Converts a slice of words to a slice of bytes in little endian.
-pub fn words_to_bytes_le<const B: usize>(words: &[u32]) -> [u8; B] {
-    debug_assert_eq!(words.len() * 4, B);
-    let mut iter = words.iter().flat_map(|word| word.to_le_bytes().into_iter());
-    core::array::from_fn(|_| iter.next().unwrap())
-}
+// Converts a slice of words to a slice of bytes in little endian.
+// pub fn words_to_bytes_le<const B: usize>(words: &[u32]) -> [u8; B] {
+//     debug_assert_eq!(words.len() * 4, B);
+//     let mut iter = words.iter().flat_map(|word| word.to_le_bytes().into_iter());
+//     core::array::from_fn(|_| iter.next().unwrap())
+// }
 
-/// Converts a byte array in little endian to a slice of words.
-pub fn bytes_to_words_le<const W: usize>(bytes: &[u8]) -> [u32; W] {
-    debug_assert_eq!(bytes.len(), W * 4);
-    let mut iter = bytes.chunks_exact(4).map(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()));
-    core::array::from_fn(|_| iter.next().unwrap())
-}
+// /// Converts a byte array in little endian to a slice of words.
+// pub fn bytes_to_words_le<const W: usize>(bytes: &[u8]) -> [u32; W] {
+//     debug_assert_eq!(bytes.len(), W * 4);
+//     let mut iter = bytes.chunks_exact(4).map(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()));
+//     core::array::from_fn(|_| iter.next().unwrap())
+// }
 
-/// Converts a byte array in little endian to a vector of words.
-pub fn bytes_to_words_le_vec(bytes: &[u8]) -> Vec<u32> {
-    bytes
-        .chunks_exact(4)
-        .map(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()))
-        .collect::<Vec<_>>()
-}
+// /// Converts a byte array in little endian to a vector of words.
+// pub fn bytes_to_words_le_vec(bytes: &[u8]) -> Vec<u32> {
+//    bytes
+//         .chunks_exact(4)
+//         .map(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()))
+//         .collect::<Vec<_>>()
+// }
 
-// Converts a num to a string with commas every 3 digits.
-pub fn num_to_comma_separated<T: ToString>(value: T) -> String {
-    value
-        .to_string()
-        .chars()
-        .rev()
-        .collect::<Vec<_>>()
-        .chunks(3)
-        .map(|chunk| chunk.iter().collect::<String>())
-        .collect::<Vec<_>>()
-        .join(",")
-        .chars()
-        .rev()
-        .collect()
-}
+// // Converts a num to a string with commas every 3 digits.
+// pub fn num_to_comma_separated<T: ToString>(value: T) -> String {
+//     value
+//         .to_string()
+//         .chars()
+//         .rev()
+//         .collect::<Vec<_>>()
+//         .chunks(3)
+//         .map(|chunk| chunk.iter().collect::<String>())
+//         .collect::<Vec<_>>()
+//         .join(",")
+//         .chars()
+//         .rev()
+//         .collect()
+// }
 
-/// Converts a 32-bit integer to a pair of 16-bit integers.
-pub fn u32_to_u16_limbs(value: u32) -> [u16; 2] {
-    [(value & 0xFFFF) as u16, (value >> 16) as u16]
-}
+// /// Converts a 32-bit integer to a pair of 16-bit integers.
+// pub fn u32_to_u16_limbs(value: u32) -> [u16; 2] {
+//     [(value & 0xFFFF) as u16, (value >> 16) as u16]
+// }

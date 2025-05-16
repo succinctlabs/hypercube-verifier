@@ -1,6 +1,4 @@
-pub mod analyzed;
 mod block;
-pub mod instruction;
 mod opcode;
 mod program;
 mod public_values;

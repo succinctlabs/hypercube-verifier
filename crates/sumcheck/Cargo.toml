@@ -9,19 +9,11 @@ categories.workspace = true
 
 [dependencies]
 p3-challenger = { workspace = true }
-p3-baby-bear = { workspace = true }
-p3-maybe-rayon = { workspace = true }
-slop-alloc = { workspace = true }
-slop-tensor = { workspace = true }
 
 slop-algebra = { workspace = true }
 p3-field = { workspace = true }
 slop-multilinear = { workspace = true }
-rayon = "1.5.1"
 serde = { workspace = true }
-itertools = { workspace = true }
-tracing = { workspace = true }
-futures = { workspace = true }
 thiserror = { workspace = true }
 
 

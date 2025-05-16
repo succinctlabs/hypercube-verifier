@@ -21,15 +21,13 @@
 //! multiplication `row * c_{tab}` can be done by bit-shift, and the addition is checked via the
 //! grade-school algorithm.
 use core::fmt;
-use std::iter::once;
-use std::{array, cmp::max};
+use std::array;
 
 use rayon::prelude::*;
 
-use p3_field::{AbstractExtensionField, AbstractField, Field};
+use p3_field::{AbstractExtensionField, AbstractField};
 use rayon::iter::ParallelIterator;
 use serde::{Deserialize, Serialize};
-use slop_utils::log2_ceil_usize;
 
 use slop_multilinear::{Mle, Point};
 
@@ -166,14 +164,6 @@ pub fn transition_function(bit_state: BitState<bool>, memory_state: MemoryState)
 }
 
 /// A struct to hold all the parameters sufficient to determine the special multilinear polynopmial
-/// appearing in the jagged sumcheck protocol.
-#[derive(Clone, Debug)]
-pub struct JaggedLittlePolynomialProverParams {
-    pub(crate) col_prefix_sums_usize: Vec<usize>,
-    pub(crate) max_log_row_count: usize,
-}
-
-/// A struct to hold all the parameters sufficient to determine the special multilinear polynopmial
 /// appearing in the jagged sumcheck protocol. All usize parameters are intended to be inferred from
 /// the proving context, while the `Vec<Point<K>>` fields are intended to be recieved directly from
 /// the prover as field elements. The verifier program thus depends only on the usize parameters.
@@ -247,158 +237,6 @@ impl<F: AbstractField + 'static + Send + Sync> JaggedLittlePolynomialVerifierPar
             .sum::<EF>();
 
         (res, branching_program_evals)
-    }
-}
-
-impl JaggedLittlePolynomialProverParams {
-    pub fn new(row_counts_usize: Vec<usize>, max_log_row_count: usize) -> Self {
-        let mut prefix_sums_usize = row_counts_usize
-            .iter()
-            .scan(0, |state, row_count| {
-                let result = *state;
-                *state += row_count;
-                Some(result)
-            })
-            .collect::<Vec<_>>();
-
-        prefix_sums_usize
-            .push(*prefix_sums_usize.last().unwrap() + row_counts_usize.last().unwrap());
-
-        JaggedLittlePolynomialProverParams {
-            col_prefix_sums_usize: prefix_sums_usize,
-            max_log_row_count,
-        }
-    }
-
-    /// Compute the "guts" of the multilinear polynomial represented by the fixed prover parameters.
-    pub fn partial_jagged_little_polynomial_evaluation<K: Field>(
-        &self,
-        z_row: &Point<K>,
-        z_col: &Point<K>,
-    ) -> Mle<K> {
-        let log_total_area = log2_ceil_usize(*self.col_prefix_sums_usize.last().unwrap());
-        let total_area = 1 << log_total_area;
-
-        let col_eq = Mle::blocking_partial_lagrange(
-            &z_col.last_k(log2_ceil_usize(self.col_prefix_sums_usize.len() - 1)),
-        );
-        let row_eq = Mle::blocking_partial_lagrange(&z_row.last_k(self.max_log_row_count));
-
-        let mut result: Vec<K> = Vec::with_capacity(total_area);
-
-        #[allow(clippy::uninit_vec)]
-        unsafe {
-            result.set_len(total_area);
-        }
-
-        let col_ranges = ColRanges::new(&self.col_prefix_sums_usize, total_area);
-
-        let result_chunk_size = max(total_area / num_cpus::get(), 1);
-        tracing::info_span!("compute jagged values").in_scope(|| {
-            (result.chunks_mut(result_chunk_size).enumerate().par_bridge()).for_each(
-                |(chunk_idx, chunk)| {
-                    let i = chunk_idx * result_chunk_size;
-                    let mut col_range_iter = col_ranges.get_col_range(i).peekable();
-                    let mut current_col_range = col_range_iter.next().unwrap();
-                    let mut current_row = i - current_col_range.start_i;
-
-                    chunk.iter_mut().for_each(|val| {
-                        *val = if current_col_range.is_last {
-                            K::zero()
-                        } else {
-                            col_eq.guts().as_slice()[current_col_range.col_idx]
-                                * row_eq.guts().as_slice()[current_row]
-                        };
-
-                        current_row += 1;
-                        while current_row == current_col_range.col_size {
-                            if col_range_iter.peek().is_none() {
-                                break;
-                            }
-                            current_col_range = col_range_iter.next().unwrap();
-                            current_row = 0;
-                        }
-                    });
-                },
-            );
-        });
-
-        result.into()
-    }
-
-    /// Convert the prover parameters into verifier parameters so that the verifier can run its
-    /// evaluation algorithm.
-    pub fn into_verifier_params<K: Field>(self) -> JaggedLittlePolynomialVerifierParams<K> {
-        let log_m = log2_ceil_usize(*self.col_prefix_sums_usize.last().unwrap());
-        let col_prefix_sums =
-            self.col_prefix_sums_usize.iter().map(|&x| Point::from_usize(x, log_m + 1)).collect();
-        JaggedLittlePolynomialVerifierParams {
-            col_prefix_sums,
-            max_log_row_count: self.max_log_row_count,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-struct ColRange {
-    col_idx: usize,
-    start_i: usize,
-    end_i: usize,
-    col_size: usize,
-    is_last: bool,
-}
-
-impl ColRange {
-    #[inline]
-    fn in_range(&self, i: usize) -> bool {
-        i >= self.start_i && i < self.end_i
-    }
-}
-
-#[derive(Debug)]
-struct ColRanges {
-    col_ranges: Vec<ColRange>,
-}
-
-impl ColRanges {
-    fn new(col_prefix_sums_usizes: &[usize], last_prefix_sum: usize) -> Self {
-        let num_col_prefix_sums = col_prefix_sums_usizes.len();
-
-        let last_range = ColRange {
-            col_idx: num_col_prefix_sums - 1,
-            start_i: col_prefix_sums_usizes[num_col_prefix_sums - 1],
-            end_i: last_prefix_sum,
-            col_size: last_prefix_sum - col_prefix_sums_usizes[num_col_prefix_sums - 1],
-            is_last: true,
-        };
-
-        ColRanges {
-            col_ranges: col_prefix_sums_usizes
-                .iter()
-                .take(num_col_prefix_sums - 1)
-                .enumerate()
-                .map(|(i, prefix_sum)| ColRange {
-                    col_idx: i,
-                    start_i: *prefix_sum,
-                    end_i: col_prefix_sums_usizes[i + 1],
-                    col_size: col_prefix_sums_usizes[i + 1] - *prefix_sum,
-                    is_last: false,
-                })
-                .chain(once(last_range))
-                .collect::<Vec<_>>(),
-        }
-    }
-
-    #[inline]
-    fn get_col_range(&self, i: usize) -> impl Iterator<Item = &ColRange> {
-        let mut col_range_iter = self.col_ranges.iter().peekable();
-        loop {
-            let col_range = col_range_iter.peek().expect("i is out of range");
-            if col_range.in_range(i) {
-                return col_range_iter;
-            }
-            col_range_iter.next().expect("must have next element");
-        }
     }
 }
 

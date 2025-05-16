@@ -4,4 +4,4 @@ mod machine;
 mod verify_compress;
 
 pub use machine::RecursionAir;
-pub use verify_compress::verify_compressed;
+pub use verify_compress::*;
