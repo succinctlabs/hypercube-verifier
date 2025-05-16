@@ -9,8 +9,6 @@ categories.workspace = true
 
 [dependencies]
 slop-multilinear = { workspace = true }
-slop-alloc = { workspace = true }
-p3-field = { workspace = true }
 slop-commit = { workspace = true }
 
 thiserror = { workspace = true }

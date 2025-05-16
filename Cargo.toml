@@ -25,8 +25,6 @@ members = [
     "crates/stark",
     "crates/primitives",
     "crates/derive",
-    # "crates/recursion/circuit",
-    # "crates/recursion/compiler",
     "crates/recursion/machine",
     "crates/recursion/derive",
     "crates/recursion/executor", "cli",
@@ -46,7 +44,6 @@ debug-assertions = true
 
 [workspace.dependencies]
 p3-air = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
-p3-bn254-fr = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
 p3-field = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
 p3-commit = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
 p3-matrix = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_config" }
@@ -76,7 +73,6 @@ slop-stacked = { path = "crates/stacked" }
 sp1-primitives = { path = "crates/primitives" }
 sp1-derive = { path = "crates/derive" }
 hypercube-stark = { path = "crates/stark" }
-hypercube-recursion-derive = { path = "crates/recursion/derive" }
 hypercube-recursion-executor = { path = "crates/recursion/executor" }
 hypercube-recursion-machine = { path = "crates/recursion/machine" }
 
@@ -90,8 +86,6 @@ derive-where = "1.2.7"
 rand = "0.8"
 serde = { version = "1.0.217", features = ["derive"] }
 tracing = "0.1.40"
-num_cpus = "1.16.0"
-hashbrown = "0.14.5"
 tracing-subscriber = "0.3.18"
 strum_macros = "0.27.1"
 strum = "0.27.1"

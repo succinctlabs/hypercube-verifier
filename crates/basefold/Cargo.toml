@@ -16,9 +16,7 @@ slop-commit = { workspace = true }
 slop-tensor = { workspace = true }
 slop-alloc = { workspace = true }
 p3-baby-bear = { workspace = true }
-p3-symmetric = { workspace = true }
 slop-merkle-tree = { workspace = true }
-p3-bn254-fr = { workspace = true }
 
 thiserror = "1.0"
 itertools = "0.12.0"
