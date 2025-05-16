@@ -1,6 +1,6 @@
 use p3_field::AbstractField;
-use slop_alloc::{Backend, CpuBackend};
-use slop_tensor::Tensor;
+use hypercube_alloc::{Backend, CpuBackend};
+use hypercube_tensor::Tensor;
 
 pub trait MleBaseBackend<F: AbstractField>: Backend {
     /// Returns the number of polynomials in the batch.

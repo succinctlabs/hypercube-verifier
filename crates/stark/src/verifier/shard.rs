@@ -6,14 +6,14 @@ use p3_air::{Air, BaseAir};
 use p3_challenger::{CanObserve, FieldChallenger};
 use p3_field::AbstractField;
 use p3_matrix::{dense::RowMajorMatrixView, stack::VerticalPair};
-use slop_basefold::DefaultBasefoldConfig;
-use slop_commit::Rounds;
-use slop_jagged::{
+use hypercube_basefold::DefaultBasefoldConfig;
+use hypercube_commit::Rounds;
+use hypercube_jagged::{
     JaggedBasefoldConfig, JaggedEvalConfig, JaggedPcsVerifier, JaggedPcsVerifierError,
     MachineJaggedPcsVerifier,
 };
-use slop_multilinear::{full_geq, Evaluations, Mle, MleEval};
-use slop_sumcheck::{partially_verify_sumcheck_proof, SumcheckError};
+use hypercube_multilinear::{full_geq, Evaluations, Mle, MleEval};
+use hypercube_sumcheck::{partially_verify_sumcheck_proof, SumcheckError};
 use thiserror::Error;
 
 use crate::{

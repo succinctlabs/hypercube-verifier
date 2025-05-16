@@ -10,7 +10,6 @@ keywords = { workspace = true }
 categories = { workspace = true }
 
 [dependencies]
-# sp1-core-machine = { workspace = true }
 sp1-derive = { workspace = true }
 sp1-primitives = { workspace = true }
 hypercube-stark = { workspace = true }
@@ -18,9 +17,9 @@ hypercube-recursion-executor = { workspace = true }
 
 p3-air = { workspace = true }
 p3-matrix = { workspace = true }
-slop-utils = { workspace = true }
+hypercube-utils = { workspace = true }
 p3-baby-bear = { workspace = true }
-slop-jagged = { workspace = true }
+hypercube-jagged = { workspace = true }
 p3-poseidon2 = { workspace = true }
 p3-field = { workspace = true }
 itertools = { workspace = true }

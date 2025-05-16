@@ -6,7 +6,7 @@ use std::{error::Error, fmt::Debug};
 
 use p3_field::{ExtensionField, Field};
 use serde::{de::DeserializeOwned, Serialize};
-use slop_multilinear::Point;
+use hypercube_multilinear::Point;
 
 use crate::JaggedLittlePolynomialVerifierParams;
 

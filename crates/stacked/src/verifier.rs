@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use slop_commit::Rounds;
-use slop_multilinear::{Evaluations, Mle, MultilinearPcsVerifier, Point};
+use hypercube_commit::Rounds;
+use hypercube_multilinear::{Evaluations, Mle, MultilinearPcsVerifier, Point};
 use thiserror::Error;
 
 #[derive(Debug, Clone)]

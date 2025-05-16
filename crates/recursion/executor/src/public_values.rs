@@ -4,7 +4,7 @@ use p3_challenger::DuplexChallenger;
 use p3_field::PrimeField32;
 use p3_symmetric::CryptographicPermutation;
 use serde::{Deserialize, Serialize};
-use slop_utils::indices_arr;
+use hypercube_utils::indices_arr;
 use sp1_derive::AlignedBorrow;
 use static_assertions::const_assert_eq;
 use std::{

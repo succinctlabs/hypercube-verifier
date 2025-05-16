@@ -9,8 +9,8 @@ use derive_where::derive_where;
 use p3_field::{AbstractExtensionField, AbstractField, Field};
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde::{Deserialize, Serialize};
-use slop_alloc::{Backend, Buffer, CpuBackend, HasBackend, GLOBAL_CPU_BACKEND};
-use slop_tensor::Tensor;
+use hypercube_alloc::{Backend, Buffer, CpuBackend, HasBackend, GLOBAL_CPU_BACKEND};
+use hypercube_tensor::Tensor;
 
 use crate::{eval::eval_mle_at_point_blocking, partial_lagrange_blocking, MleBaseBackend, Point};
 

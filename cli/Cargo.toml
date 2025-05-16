@@ -11,5 +11,6 @@ categories.workspace = true
 hypercube-recursion-machine = {workspace = true}
 bincode = "1.3.3"
 clap = { version = "4.5.9", features = ["derive", "env"] }
+ratatui = "0.29.0"
 [lints]
 workspace = true

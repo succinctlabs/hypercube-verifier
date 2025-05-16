@@ -8,7 +8,7 @@ use itertools::Itertools;
 use p3_baby_bear::BabyBear;
 use p3_field::AbstractField;
 use serde::{Deserialize, Serialize};
-use slop_jagged::BabyBearPoseidon2;
+use hypercube_jagged::BabyBearPoseidon2;
 use sp1_primitives::{io::SP1PublicValues, poseidon2_hash};
 use strum_macros::{EnumDiscriminants, EnumTryAs};
 use thiserror::Error;

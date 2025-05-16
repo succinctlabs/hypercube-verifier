@@ -2,9 +2,9 @@ use itertools::Itertools;
 use p3_challenger::{CanObserve, CanSampleBits, FieldChallenger, GrindingChallenger};
 use p3_field::{AbstractExtensionField, AbstractField, TwoAdicField};
 use serde::{Deserialize, Serialize};
-use slop_commit::{TensorCs, TensorCsOpening};
-use slop_multilinear::{Evaluations, MultilinearPcsVerifier, Point};
-use slop_utils::reverse_bits_len;
+use hypercube_commit::{TensorCs, TensorCsOpening};
+use hypercube_multilinear::{Evaluations, MultilinearPcsVerifier, Point};
+use hypercube_utils::reverse_bits_len;
 use thiserror::Error;
 
 use crate::{BasefoldConfig, DefaultBasefoldConfig};

@@ -6,7 +6,7 @@ use derive_where::derive_where;
 use p3_challenger::FieldChallenger;
 use p3_field::{ExtensionField, Field};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use slop_alloc::{Backend, CpuBackend, HasBackend};
+use hypercube_alloc::{Backend, CpuBackend, HasBackend};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[derive_where(PartialEq, Eq; MleEval<F, A>)]

@@ -1,9 +1,9 @@
 use p3_challenger::FieldChallenger;
 use p3_field::AbstractField;
 use serde::{Deserialize, Serialize};
-use slop_multilinear::{full_geq, Evaluations, Mle, Point};
-use slop_stacked::{StackedPcsProof, StackedPcsVerifier};
-use slop_sumcheck::{partially_verify_sumcheck_proof, PartialSumcheckProof, SumcheckError};
+use hypercube_multilinear::{full_geq, Evaluations, Mle, Point};
+use hypercube_stacked::{StackedPcsProof, StackedPcsVerifier};
+use hypercube_sumcheck::{partially_verify_sumcheck_proof, PartialSumcheckProof, SumcheckError};
 use std::fmt::Debug;
 use thiserror::Error;
 

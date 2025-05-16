@@ -1,6 +1,6 @@
 use p3_field::AbstractField;
-use slop_alloc::CpuBackend;
-use slop_tensor::Tensor;
+use hypercube_alloc::CpuBackend;
+use hypercube_tensor::Tensor;
 
 use crate::Point;
 

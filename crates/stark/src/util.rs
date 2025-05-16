@@ -1,5 +1,5 @@
+use hypercube_merkle_tree::my_bb_16_perm;
 use p3_field::Field;
-use slop_merkle_tree::my_bb_16_perm;
 
 /// The digest size.
 pub const DIGEST_SIZE: usize = 8;
@@ -35,6 +35,6 @@ pub fn log2_ceil_usize(n: usize) -> usize {
 
 /// Get the inner perm
 #[must_use]
-pub fn inner_perm() -> slop_merkle_tree::Perm {
+pub fn inner_perm() -> hypercube_merkle_tree::Perm {
     my_bb_16_perm()
 }

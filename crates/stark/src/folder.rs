@@ -11,7 +11,7 @@ use p3_air::{
 };
 use p3_field::{AbstractExtensionField, AbstractField, ExtensionField, Field};
 use p3_matrix::{dense::RowMajorMatrixView, stack::VerticalPair};
-use slop_jagged::JaggedConfig;
+use hypercube_jagged::JaggedConfig;
 
 /// A folder for verifier constraints.
 pub type VerifierConstraintFolder<'a, C> = GenericVerifierConstraintFolder<

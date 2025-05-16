@@ -1,5 +1,5 @@
 [package]
-name = "slop-jagged"
+name = "hypercube-jagged"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -8,13 +8,13 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-slop-multilinear = { workspace = true }
+hypercube-multilinear = { workspace = true }
 p3-baby-bear = { workspace = true }
-slop-sumcheck = { workspace = true }
+hypercube-sumcheck = { workspace = true }
 p3-field = { workspace = true }
 p3-challenger = { workspace = true }
-slop-stacked = { workspace = true }
-slop-basefold = { workspace = true }
+hypercube-stacked = { workspace = true }
+hypercube-basefold = { workspace = true }
 rayon = "1.5.0"
 serde = { workspace = true, features = ["rc"] }
 thiserror = { workspace = true }

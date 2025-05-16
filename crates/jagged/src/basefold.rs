@@ -1,10 +1,10 @@
 use p3_baby_bear::BabyBear;
 use serde::{Deserialize, Serialize};
-use slop_basefold::{
+use hypercube_basefold::{
     BasefoldConfig, BasefoldProof, BasefoldVerifier, DefaultBasefoldConfig,
     Poseidon2BabyBear16BasefoldConfig,
 };
-use slop_stacked::StackedPcsVerifier;
+use hypercube_stacked::StackedPcsVerifier;
 use std::fmt::Debug;
 
 use crate::{JaggedConfig, JaggedEvalConfig, JaggedEvalSumcheckConfig, JaggedPcsVerifier};

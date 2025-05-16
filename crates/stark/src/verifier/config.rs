@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use p3_challenger::CanObserve;
 use p3_field::AbstractField;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use slop_jagged::JaggedConfig;
+use hypercube_jagged::JaggedConfig;
 
 use crate::septic_digest::SepticDigest;
 
@@ -18,7 +18,7 @@ impl<C> MachineConfig for C where
 {
 }
 
-pub use slop_jagged::BabyBearPoseidon2;
+pub use hypercube_jagged::BabyBearPoseidon2;
 
 /// A specification of preprocessed polynomial batch dimensions.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]

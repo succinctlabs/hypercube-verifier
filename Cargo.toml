@@ -59,17 +59,17 @@ p3-uni-stark = { git = "https://github.com/erabinov/Plonky3/", branch = "clone_c
 
 
 #hypercube verifier
-slop-basefold = { path = "crates/basefold" }
-slop-algebra = { path = "crates/algebra" }
-slop-sumcheck = { path = "crates/sumcheck" }
-slop-multilinear = { path = "crates/multilinear" }
-slop-utils = { path = "crates/utils" }
-slop-merkle-tree = { path = "crates/merkle-tree" }
-slop-commit = { path = "crates/commit" }
-slop-tensor = { path = "crates/tensor" }
-slop-alloc = { path = "crates/alloc" }
-slop-jagged = { path = "crates/jagged" }
-slop-stacked = { path = "crates/stacked" }
+hypercube-basefold = { path = "crates/basefold" }
+hypercube-algebra = { path = "crates/algebra" }
+hypercube-sumcheck = { path = "crates/sumcheck" }
+hypercube-multilinear = { path = "crates/multilinear" }
+hypercube-utils = { path = "crates/utils" }
+hypercube-merkle-tree = { path = "crates/merkle-tree" }
+hypercube-commit = { path = "crates/commit" }
+hypercube-tensor = { path = "crates/tensor" }
+hypercube-alloc = { path = "crates/alloc" }
+hypercube-jagged = { path = "crates/jagged" }
+hypercube-stacked = { path = "crates/stacked" }
 sp1-primitives = { path = "crates/primitives" }
 sp1-derive = { path = "crates/derive" }
 hypercube-stark = { path = "crates/stark" }

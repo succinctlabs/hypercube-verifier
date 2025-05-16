@@ -1,9 +1,9 @@
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
-use slop_alloc::{Backend, CpuBackend};
-use slop_multilinear::{Mle, MleEval, Point};
-use slop_sumcheck::PartialSumcheckProof;
+use hypercube_alloc::{Backend, CpuBackend};
+use hypercube_multilinear::{Mle, MleEval, Point};
+use hypercube_sumcheck::PartialSumcheckProof;
 
 /// The output of the log-up GKR circuit.
 #[derive(Debug, Serialize, Deserialize, Clone)]

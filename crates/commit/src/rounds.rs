@@ -1,7 +1,7 @@
 use std::ops::{Deref, DerefMut};
 
 use serde::{Deserialize, Serialize};
-use slop_alloc::HasBackend;
+use hypercube_alloc::HasBackend;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Rounds<M> {

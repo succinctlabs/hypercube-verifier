@@ -1,5 +1,5 @@
 [package]
-name = "slop-sumcheck"
+name = "hypercube-sumcheck"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -10,9 +10,9 @@ categories.workspace = true
 [dependencies]
 p3-challenger = { workspace = true }
 
-slop-algebra = { workspace = true }
+hypercube-algebra = { workspace = true }
 p3-field = { workspace = true }
-slop-multilinear = { workspace = true }
+hypercube-multilinear = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 

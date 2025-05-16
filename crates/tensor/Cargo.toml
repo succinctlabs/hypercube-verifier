@@ -1,5 +1,5 @@
 [package]
-name = "slop-tensor"
+name = "hypercube-tensor"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -8,7 +8,7 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-slop-alloc = { workspace = true }
+hypercube-alloc = { workspace = true }
 p3-matrix = { workspace = true }
 arrayvec = "0.7.6"
 rand = { workspace = true }

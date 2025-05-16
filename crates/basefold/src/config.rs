@@ -5,8 +5,8 @@ use p3_baby_bear::BabyBear;
 use p3_challenger::{CanObserve, DuplexChallenger, FieldChallenger, GrindingChallenger};
 use p3_field::{extension::BinomialExtensionField, ExtensionField, TwoAdicField};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use slop_commit::TensorCs;
-use slop_merkle_tree::{my_bb_16_perm, MerkleTreeTcs, Perm, Poseidon2BabyBearConfig};
+use hypercube_commit::TensorCs;
+use hypercube_merkle_tree::{my_bb_16_perm, MerkleTreeTcs, Perm, Poseidon2BabyBearConfig};
 
 use crate::{BasefoldVerifier, FriConfig};
 

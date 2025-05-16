@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
-use slop_jagged::JaggedPcsProof;
+use hypercube_jagged::JaggedPcsProof;
 use p3_matrix::{dense::RowMajorMatrixView, stack::VerticalPair};
-use slop_multilinear::Point;
-use slop_sumcheck::PartialSumcheckProof;
+use hypercube_multilinear::Point;
+use hypercube_sumcheck::PartialSumcheckProof;
 
 use crate::LogupGkrProof;
 

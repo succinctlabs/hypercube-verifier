@@ -2,7 +2,7 @@ use thiserror::Error;
 
 use p3_challenger::FieldChallenger;
 use p3_field::{ExtensionField, Field};
-use slop_multilinear::Point;
+use hypercube_multilinear::Point;
 
 use crate::PartialSumcheckProof;
 

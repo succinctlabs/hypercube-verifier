@@ -3,7 +3,7 @@ use std::{
     mem::{size_of, transmute},
 };
 
-use slop_utils::indices_arr;
+use hypercube_utils::indices_arr;
 use sp1_derive::AlignedBorrow;
 
 use super::{NUM_EXTERNAL_ROUNDS, NUM_INTERNAL_ROUNDS, WIDTH};

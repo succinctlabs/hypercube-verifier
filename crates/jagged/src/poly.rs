@@ -29,7 +29,7 @@ use p3_field::{AbstractExtensionField, AbstractField};
 use rayon::iter::ParallelIterator;
 use serde::{Deserialize, Serialize};
 
-use slop_multilinear::{Mle, Point};
+use hypercube_multilinear::{Mle, Point};
 
 /// A struct recording the state of the memory of the branching program. Because the program performs
 /// a two-way addition and one u32 comparison, the memory needed is a carry (which lies in {0,1})

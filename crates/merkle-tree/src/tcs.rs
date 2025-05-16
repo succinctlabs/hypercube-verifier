@@ -2,9 +2,9 @@ use std::fmt::Debug;
 
 use itertools::Itertools;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use slop_commit::{TensorCs, TensorCsOpening};
+use hypercube_commit::{TensorCs, TensorCsOpening};
 use p3_symmetric::{CryptographicHasher, PseudoCompressionFunction};
-use slop_tensor::Tensor;
+use hypercube_tensor::Tensor;
 use thiserror::Error;
 
 /// An interfacr defining a Merkle tree.

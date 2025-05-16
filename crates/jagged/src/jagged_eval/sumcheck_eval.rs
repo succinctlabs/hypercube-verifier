@@ -3,8 +3,8 @@ use std::{fmt::Debug, marker::PhantomData};
 use p3_challenger::FieldChallenger;
 use p3_field::{ExtensionField, Field};
 use serde::{Deserialize, Serialize};
-use slop_multilinear::{Mle, Point};
-use slop_sumcheck::{partially_verify_sumcheck_proof, PartialSumcheckProof, SumcheckError};
+use hypercube_multilinear::{Mle, Point};
+use hypercube_sumcheck::{partially_verify_sumcheck_proof, PartialSumcheckProof, SumcheckError};
 use thiserror::Error;
 
 use crate::{poly::BranchingProgram, JaggedLittlePolynomialVerifierParams};

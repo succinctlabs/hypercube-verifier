@@ -1,7 +1,7 @@
 use p3_challenger::{CanObserve, FieldChallenger};
 use p3_field::{ExtensionField, Field};
 use serde::{de::DeserializeOwned, Serialize};
-use slop_multilinear::MultilinearPcsVerifier;
+use hypercube_multilinear::MultilinearPcsVerifier;
 use std::fmt::Debug;
 
 use crate::JaggedEvalConfig;

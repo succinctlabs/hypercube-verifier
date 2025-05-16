@@ -1,7 +1,7 @@
 use p3_field::{AbstractExtensionField, AbstractField};
 use rayon::prelude::*;
-use slop_alloc::{buffer, Buffer, CpuBackend};
-use slop_tensor::{Dimensions, Tensor};
+use hypercube_alloc::{buffer, Buffer, CpuBackend};
+use hypercube_tensor::{Dimensions, Tensor};
 
 use crate::{partial_lagrange_blocking, Point};
 

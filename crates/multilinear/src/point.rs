@@ -8,8 +8,8 @@ use derive_where::derive_where;
 use p3_field::AbstractField;
 use rand::{distributions::Standard, prelude::Distribution};
 use serde::{Deserialize, Serialize};
-use slop_alloc::{buffer, Backend, Buffer, CpuBackend, HasBackend, Init, Slice};
-use slop_tensor::Tensor;
+use hypercube_alloc::{buffer, Backend, Buffer, CpuBackend, HasBackend, Init, Slice};
+use hypercube_tensor::Tensor;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[derive_where(PartialEq, Eq; Buffer<T, A>)]

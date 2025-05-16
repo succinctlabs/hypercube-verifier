@@ -13,9 +13,8 @@ categories = { workspace = true }
 p3-field = { workspace = true }
 p3-symmetric = { workspace = true }
 sp1-derive = { workspace = true }
-# sp1-core-machine = { workspace = true }
 hypercube-stark = { workspace = true }
 p3-challenger = { workspace = true }
-slop-utils = { workspace = true }
+hypercube-utils = { workspace = true }
 serde = { workspace = true, features = ["derive", "rc"] }
 static_assertions = "1.1.0"

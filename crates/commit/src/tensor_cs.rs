@@ -1,7 +1,7 @@
 use std::{error::Error, fmt::Debug};
 
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use slop_tensor::Tensor;
+use hypercube_tensor::Tensor;
 
 /// An opening of a tensor commitment scheme.
 #[derive(Debug, Clone, Serialize, Deserialize)]

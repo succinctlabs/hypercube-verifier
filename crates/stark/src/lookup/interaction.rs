@@ -3,7 +3,7 @@ use std::ops::Mul;
 
 use p3_air::{PairCol, VirtualPairCol};
 use p3_field::{AbstractField, Field};
-use slop_multilinear::MleEval;
+use hypercube_multilinear::MleEval;
 
 use crate::air::InteractionScope;
 

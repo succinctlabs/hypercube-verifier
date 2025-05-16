@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use slop_algebra::UnivariatePolynomial;
-use slop_multilinear::Point;
+use hypercube_algebra::UnivariatePolynomial;
+use hypercube_multilinear::Point;
 
 /// A sumchexckl proof that does not include the evaluation proofs.
 ///

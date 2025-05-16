@@ -1,11 +1,11 @@
 //! Elliptic Curve `y^2 = x^3 + 2x + 26z^5` over the `F_{p^7} = F_p[z]/(z^7 - 2z - 5)` extension
 //! field.
 use crate::septic_extension::SepticExtension;
+use hypercube_merkle_tree::my_bb_16_perm;
 use p3_baby_bear::BabyBear;
 use p3_field::{AbstractExtensionField, AbstractField, Field, PrimeField32};
 use p3_symmetric::Permutation;
 use serde::{Deserialize, Serialize};
-use slop_merkle_tree::my_bb_16_perm;
 use std::ops::Add;
 
 /// A septic elliptic curve point on y^2 = x^3 + 2x + 26z^5 over field `F_{p^7} = F_p[z]/(z^7 - 2z -
@@ -56,9 +56,9 @@ impl<F: Field> SepticCurve<F> {
     /// Adds two elliptic curve points, assuming that the addition doesn't lead to the exception
     /// cases of weierstrass addition.
     pub fn add_incomplete(&self, other: SepticCurve<F>) -> Self {
-        let slope = (other.y - self.y) / (other.x - self.x);
-        let result_x = slope.square() - self.x - other.x;
-        let result_y = slope * (self.x - result_x) - self.y;
+        let hypercubee = (other.y - self.y) / (other.x - self.x);
+        let result_x = hypercubee.square() - self.x - other.x;
+        let result_y = hypercubee * (self.x - result_x) - self.y;
         Self { x: result_x, y: result_y }
     }
 
@@ -73,9 +73,10 @@ impl<F: Field> SepticCurve<F> {
     #[must_use]
     /// Double the elliptic curve point.
     pub fn double(&self) -> Self {
-        let slope = (self.x * self.x * F::from_canonical_u8(3u8) + F::two()) / (self.y * F::two());
-        let result_x = slope.square() - self.x * F::two();
-        let result_y = slope * (self.x - result_x) - self.y;
+        let hypercubee =
+            (self.x * self.x * F::from_canonical_u8(3u8) + F::two()) / (self.y * F::two());
+        let result_x = hypercubee.square() - self.x * F::two();
+        let result_y = hypercubee * (self.x - result_x) - self.y;
         Self { x: result_x, y: result_y }
     }
 

@@ -5,10 +5,10 @@ use std::{
 };
 
 use derive_where::derive_where;
+use hypercube_alloc::{Backend, Buffer, CpuBackend, Init, TryReserveError, GLOBAL_CPU_BACKEND};
 use p3_matrix::Matrix;
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-use slop_alloc::{Backend, Buffer, CpuBackend, Init, TryReserveError, GLOBAL_CPU_BACKEND};
 
 use crate::{Dimensions, DimensionsError};
 

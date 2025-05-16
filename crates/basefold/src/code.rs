@@ -1,8 +1,8 @@
 use derive_where::derive_where;
 use p3_field::{AbstractField, TwoAdicField};
 use serde::{Deserialize, Serialize};
-use slop_alloc::{Backend, CpuBackend, HasBackend};
-use slop_tensor::Tensor;
+use hypercube_alloc::{Backend, CpuBackend, HasBackend};
+use hypercube_tensor::Tensor;
 use std::{
     borrow::{Borrow, BorrowMut},
     marker::PhantomData,

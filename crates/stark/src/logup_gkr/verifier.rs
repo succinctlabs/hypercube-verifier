@@ -3,8 +3,8 @@ use std::{collections::BTreeSet, marker::PhantomData, ops::Deref};
 use itertools::Itertools;
 use p3_field::{ExtensionField, Field};
 use p3_challenger::FieldChallenger;
-use slop_multilinear::{full_geq, Mle, MleEval, MultilinearPcsChallenger, Point};
-use slop_sumcheck::{partially_verify_sumcheck_proof, SumcheckError};
+use hypercube_multilinear::{full_geq, Mle, MleEval, MultilinearPcsChallenger, Point};
+use hypercube_sumcheck::{partially_verify_sumcheck_proof, SumcheckError};
 use thiserror::Error;
 
 use crate::{air::MachineAir, Chip};

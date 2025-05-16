@@ -1,5 +1,5 @@
 [package]
-name = "slop-stacked"
+name = "hypercube-stacked"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -8,8 +8,8 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-slop-multilinear = { workspace = true }
-slop-commit = { workspace = true }
+hypercube-multilinear = { workspace = true }
+hypercube-commit = { workspace = true }
 
 thiserror = { workspace = true }
 serde = { workspace = true }
