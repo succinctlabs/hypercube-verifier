@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
 use hypercube_algebra::UnivariatePolynomial;
 use hypercube_multilinear::Point;
+use serde::{Deserialize, Serialize};
 
-/// A sumchexckl proof that does not include the evaluation proofs.
+/// A sumcheck proof that does not include the evaluation proofs.
 ///
 /// Verifying a partial sumcheck proof is equivalent to verifying the sumcheck claim on the
 /// condition of having evaluation proofs for the given componment polynomials at the given points.
