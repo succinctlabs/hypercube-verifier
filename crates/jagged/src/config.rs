@@ -6,7 +6,7 @@ use std::fmt::Debug;
 
 use crate::JaggedEvalConfig;
 
-pub trait JaggedConfig: 'static + Clone + Send + Clone + Serialize + DeserializeOwned {
+pub trait JaggedConfig: 'static + Clone + Send + Serialize + DeserializeOwned {
     type F: Field;
     type EF: ExtensionField<Self::F>;
 

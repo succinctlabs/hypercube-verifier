@@ -39,8 +39,8 @@ pub struct MerkleTreeTcs<M: MerkleTreeConfig> {
 
 #[derive(Debug, Clone, Copy, Error)]
 pub enum MerkleTreeTcsError {
-    #[error("root mismatch")]
-    RootMismatch,
+    #[error("Merkle tree root mismatch: expected {expected} but got {actual}")]
+    RootMismatch { expected: String, actual: String },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

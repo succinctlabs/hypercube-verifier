@@ -10,8 +10,8 @@ use crate::PartialSumcheckProof;
 pub enum SumcheckError {
     #[error("invalid proof shape")]
     InvalidProofShape,
-    #[error("sumcheck round inconsistency")]
-    SumcheckRoundInconsistency,
+    #[error("sumcheck round inconsistency: expected value {expected} but got {actual}")]
+    SumcheckRoundInconsistency { expected: String, actual: String },
     #[error("inconsistency of prover message with claimed sum")]
     InconsistencyWithClaimedSum,
     #[error("inconsistency of proof with evaluation claim")]
