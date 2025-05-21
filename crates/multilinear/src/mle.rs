@@ -12,7 +12,8 @@ use p3_field::{AbstractExtensionField, AbstractField, Field};
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde::{Deserialize, Serialize};
 
-use crate::{eval::eval_mle_at_point_blocking, partial_lagrange_blocking, MleBaseBackend, Point};
+use crate::eval::{eval_mle_at_point_blocking, eval_mle_at_point_small_batch};
+use crate::{partial_lagrange_blocking, MleBaseBackend, Point};
 
 /// A bacth of multi-linear polynomials.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -263,7 +264,15 @@ impl<T> Mle<T, CpuBackend> {
         T: AbstractField + 'static + Send + Sync,
         E: AbstractExtensionField<T> + 'static + Send + Sync,
     {
-        MleEval::new(eval_mle_at_point_blocking(self.guts(), point))
+        // Modify this line to use the optimized function when appropriate
+        let result = if self.num_polynomials() < 4 {
+            // For small batches, use the specialized implementation
+            MleEval::new(eval_mle_at_point_small_batch(self.guts(), point))
+        } else {
+            // For larger batches, use the parallel implementation
+            MleEval::new(eval_mle_at_point_blocking(self.guts(), point))
+        };
+        result
     }
 
     pub fn blocking_partial_lagrange(point: &Point<T>) -> Mle<T, CpuBackend>
@@ -284,25 +293,43 @@ impl<T> Mle<T, CpuBackend> {
     ///
     /// The polynomial f(X,Y) is an important building block in zerocheck and other protocols which use
     /// sumcheck.
-    pub fn full_lagrange_eval<EF>(point_1: &Point<T>, point_2: &Point<EF>) -> EF
-    where
-        T: AbstractField,
-        EF: AbstractExtensionField<T>,
-    {
-        assert_eq!(point_1.dimension(), point_2.dimension());
-
-        // Iterate over all values in the n-variates X and Y.
-        point_1
-            .iter()
-            .zip(point_2.iter())
-            .map(|(x, y)| {
-                // Multiply by (x_i * y_i + (1-x_i) * (1-y_i)).
-                let prod = y.clone() * x.clone();
-                prod.clone() + prod + EF::one() - x.clone() - y.clone()
-            })
-            .product()
+        pub fn full_lagrange_eval<EF>(point_1: &Point<T>, point_2: &Point<EF>) -> EF
+        where
+            T: AbstractField,
+            EF: AbstractExtensionField<T>,
+        {
+            assert_eq!(point_1.dimension(), point_2.dimension());
+    
+            // Iterate over all values in the n-variates X and Y.
+            point_1
+                .iter()
+                .zip(point_2.iter())
+                .map(|(x, y)| {
+                    // Multiply by (x_i * y_i + (1-x_i) * (1-y_i)).
+                    let prod = y.clone() * x.clone();
+                    prod.clone() + prod + EF::one() - x.clone() - y.clone()
+                })
+                .product()
+        }
     }
-}
+
+
+// pub fn blocking_eval_at<E>(&self, point: &Point<E>) -> MleEval<E>
+// where
+//     T: AbstractField + 'static + Send + Sync,
+//     E: AbstractExtensionField<T> + 'static + Send + Sync,
+// {
+//     // Modify this line to use the optimized function when appropriate
+//     let result = if self.num_polynomials() < 4 {
+//         // For small batches, use the specialized implementation
+//         MleEval::new(eval_mle_at_point_small_batch(self.guts(), point))
+//     } else {
+//         // For larger batches, use the parallel implementation
+//         MleEval::new(eval_mle_at_point_blocking(self.guts(), point))
+//     };
+//     result
+// }
+// }
 
 // impl<T: AbstractField + Send + Sync> TryInto<p3_matrix::dense::RowMajorMatrix<T>>
 //     for Mle<T, CpuBackend>
@@ -492,3 +519,4 @@ impl<T> FromIterator<T> for MleEval<T, CpuBackend> {
         Self::new(Tensor::from(iter.into_iter().collect::<Vec<_>>()))
     }
 }
+
