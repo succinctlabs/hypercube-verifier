@@ -20,10 +20,13 @@ pub struct JaggedSumcheckEvalProof<F> {
 #[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct JaggedEvalSumcheckConfig<F>(PhantomData<F>);
 
+//added a new error variant to JaggedEvalSumcheckError to handle the case where the claimedSum doesn't match
 #[derive(Debug, Error)]
 pub enum JaggedEvalSumcheckError<F: Field> {
     #[error("sumcheck error: {0}")]
     SumcheckError(SumcheckError),
+    #[error("claimed sum mismatch, expected: {0}, got: {1}")]
+    ClaimedSumMismatch(F, F),
     #[error("jagged evaluation proof verification failed, expected: {0}, got: {1}")]
     JaggedEvaluationFailed(F, F),
 }
@@ -59,6 +62,14 @@ where
                 *partial_lagrange * *branching_program_eval
             })
             .sum::<EF>();
+// added this missing piece to ensure that the jagged eval matches the claimed sum. as a malicious prover could 
+// claim a sum that is different from the actual sum, this check ensures that the sum is correct.
+        if jagged_eval != partial_sumcheck_proof.claimed_sum {
+            return Err(JaggedEvalSumcheckError::ClaimedSumMismatch(
+                jagged_eval,
+                partial_sumcheck_proof.claimed_sum,
+            ));
+        }
 
         // Verify the jagged eval proof.
         let result = partially_verify_sumcheck_proof(partial_sumcheck_proof, challenger);
