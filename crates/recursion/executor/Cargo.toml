@@ -1,0 +1,55 @@
+[package]
+name = "sp1-recursion-executor"
+description = "SP1 is a performant, 100% open-source, contributor-friendly zkVM."
+readme = "../../../README.md"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[dependencies]
+slop-algebra = { workspace = true }
+slop-maybe-rayon = { workspace = true }
+slop-poseidon2 = { workspace = true }
+slop-symmetric = { workspace = true }
+sp1-derive = { workspace = true }
+tracing = { workspace = true }
+sp1-hypercube = { workspace = true }
+hashbrown = { workspace = true, features = ["serde"] }
+itertools = { workspace = true }
+serde = { workspace = true, features = ["derive", "rc"] }
+backtrace = { workspace = true, features = ["serde"] }
+static_assertions = { workspace = true }
+thiserror = { workspace = true }
+range-set-blaze = { workspace = true, optional = true }
+smallvec = { workspace = true, features = [
+    "const_generics",
+    "const_new",
+    "serde",
+    "union",
+    "write",
+], optional = true }
+cfg-if = { workspace = true }
+
+[dev-dependencies]
+range-set-blaze = { workspace = true }
+smallvec = { workspace = true, features = [
+    "const_generics",
+    "const_new",
+    "serde",
+    "union",
+    "write",
+] }
+
+[build-dependencies]
+sp1-hypercube = { workspace = true }
+
+[features]
+# Enables processing and printing of backtraces.
+debug = []
+program_validation = ["dep:range-set-blaze", "dep:smallvec"]
+
+[lints]
+workspace = true

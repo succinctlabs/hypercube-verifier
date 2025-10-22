@@ -1,0 +1,25 @@
+[package]
+name = "slop-futures"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+rayon = { workspace = true }
+tokio = { workspace = true, features = ["sync", "rt"] }
+futures = { workspace = true }
+thiserror = { workspace = true }
+
+crossbeam = { workspace = true }
+pin-project = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+rand = { workspace = true }
+tokio = { workspace = true, features = ["sync", "rt", "time", "macros"] }
+
+[lints]
+workspace = true

@@ -1,0 +1,103 @@
+# This workflow publishes the docker image for groth16 and plonk proving to ghcr.io.
+name: Docker Publish Gnark
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: "Docker tag to push"
+        required: true
+  workflow_call:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: succinctlabs/sp1-gnark
+
+jobs:
+  build-amd64:
+    runs-on: [runs-on, runner=64cpu-linux-x64, spot=false, "run-id=${{ github.run_id }}"]
+    permissions:
+      id-token: write
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Docker BuildX
+        uses: docker/setup-buildx-action@v3
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.gnark-ffi
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-arm64:
+    runs-on: [runs-on, runner=64cpu-linux-arm64, spot=false, "run-id=${{ github.run_id }}"]
+    permissions:
+      id-token: write
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Docker BuildX
+        uses: docker/setup-buildx-action@v3
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push ARM64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.gnark-ffi
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  create-manifest:
+    needs: [build-amd64, build-arm64]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create and push manifest
+        run: |
+          TAGS=""
+          if [[ "${{ github.event_name }}" == 'workflow_dispatch' ]]; then
+            TAGS="${{ github.event.inputs.tags }}"
+          elif [[ "${{ github.event_name }}" == 'schedule' ]]; then
+            TAGS="nightly nightly-${{ github.sha }}"
+          else
+            TAGS="${GITHUB_REF##*/}"
+          fi
+          
+          for TAG in $TAGS; do
+            docker buildx imagetools create -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-amd64 \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-arm64
+          done

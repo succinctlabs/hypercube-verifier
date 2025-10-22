@@ -1,0 +1,9 @@
+[package]
+name = "aggregation-program"
+version = "1.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+sha2 = "0.10.8"
+sp1-zkvm = { workspace = true, features = ["verify"] }

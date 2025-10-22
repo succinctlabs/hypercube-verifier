@@ -1,0 +1,41 @@
+[package]
+name = "slop-jagged"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+slop-multilinear = { workspace = true }
+slop-baby-bear = { workspace = true }
+slop-bn254 = { workspace = true }
+slop-koala-bear = { workspace = true }
+slop-sumcheck = { workspace = true }
+slop-algebra = { workspace = true }
+slop-utils = { workspace = true }
+slop-challenger = { workspace = true }
+slop-stacked = { workspace = true }
+slop-alloc = { workspace = true }
+slop-commit = { workspace = true }
+slop-basefold-prover = { workspace = true }
+slop-basefold = { workspace = true }
+slop-futures = { workspace = true }
+slop-tensor = { workspace = true }
+slop-symmetric = { workspace = true }
+
+itertools = { workspace = true }
+tracing = { workspace = true }
+rayon = { workspace = true }
+serde = { workspace = true, features = ["rc"] }
+tokio = { workspace = true, features = ["sync"] }
+thiserror = { workspace = true }
+futures = { workspace = true }
+derive-where = { workspace = true }
+rand = { workspace = true }
+num_cpus = { workspace = true }
+
+[dev-dependencies]
+slop-baby-bear = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt"] }

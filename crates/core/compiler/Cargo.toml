@@ -1,0 +1,24 @@
+[package]
+name = "sp1-constraint-compiler"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+include.workspace = true
+
+[dependencies]
+slop-air = { workspace = true }
+
+sp1-core-machine = { workspace = true }
+sp1-hypercube = { workspace = true }
+sp1-primitives = { workspace = true }
+
+# dependencies for the binary
+
+clap = { workspace = true, features = ["derive", "env"] }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

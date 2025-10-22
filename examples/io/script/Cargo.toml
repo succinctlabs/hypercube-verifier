@@ -1,0 +1,13 @@
+[package]
+name = "io-script"
+version = { workspace = true }
+edition = { workspace = true }
+publish = false
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+sp1-sdk = { workspace = true, default-features = true }
+tokio = { workspace = true }
+
+[build-dependencies]
+sp1-build = { workspace = true }

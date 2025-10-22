@@ -1,0 +1,13 @@
+[package]
+name = "aggregation-script"
+version = { workspace = true }
+edition = { workspace = true }
+publish = false
+
+[dependencies]
+sp1-sdk = { workspace = true, default-features = true }
+tracing = { workspace = true }
+tokio = { workspace = true }
+
+[build-dependencies]
+sp1-build = { workspace = true }

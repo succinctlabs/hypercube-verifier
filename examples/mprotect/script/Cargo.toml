@@ -1,0 +1,27 @@
+[package]
+name = "mprotect-script"
+version = { workspace = true }
+edition = { workspace = true }
+default-run = "mprotect-script"
+publish = false
+
+[dependencies]
+sp1-sdk = { workspace = true, default-features = true }
+tokio = { workspace = true }
+sp1-prover = { workspace = true }
+sp1-core-executor = { workspace = true }
+sp1-build = { workspace = true }
+sp1-core-machine = { workspace = true }
+sp1-primitives = { workspace = true }
+tracing = "0.1"
+
+[build-dependencies]
+sp1-build = { workspace = true }
+
+[[bin]]
+name = "core_u64"
+path = "bin/core_u64.rs"
+
+[[bin]]
+name = "mprotect-script"
+path = "src/main.rs"

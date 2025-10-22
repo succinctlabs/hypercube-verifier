@@ -1,0 +1,138 @@
+use serde::{Deserialize, Serialize};
+use slop_algebra::TwoAdicField;
+
+/// A fully expanded WHIR configuration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WhirProofShape<F> {
+    pub domain_generator: F,
+
+    /// The OOD samples used in the commitment.
+    pub starting_ood_samples: usize,
+
+    /// The rate of the initial RS code used during the protocol.
+    pub starting_log_inv_rate: usize,
+
+    /// The initial folding factor.
+    pub starting_interleaved_log_height: usize,
+
+    /// The initial domain size
+    pub starting_domain_log_size: usize,
+
+    /// The initial pow bits used in the first fold.
+    pub starting_folding_pow_bits: Vec<f64>,
+
+    /// The round-specific parameters.
+    pub round_parameters: Vec<RoundConfig>,
+
+    /// Degree of the final polynomial sent over.
+    pub final_poly_log_degree: usize,
+
+    /// Number of queries in the last round
+    pub final_queries: usize,
+
+    /// Number of final bits of proof of work (for the queries).
+    pub final_pow_bits: f64,
+
+    /// Number of final bits of proof of work (for the sumcheck).
+    pub final_folding_pow_bits: Vec<f64>,
+}
+
+impl<F: TwoAdicField> WhirProofShape<F> {
+    pub fn default_whir_config() -> Self {
+        let folding_factor = 4;
+        WhirProofShape::<F> {
+            domain_generator: F::two_adic_generator(13),
+            starting_ood_samples: 1,
+            starting_log_inv_rate: 1,
+            starting_interleaved_log_height: 12,
+            starting_domain_log_size: 13,
+            starting_folding_pow_bits: vec![10.0; folding_factor],
+            round_parameters: vec![
+                RoundConfig {
+                    folding_factor,
+                    evaluation_domain_log_size: 12,
+                    queries_pow_bits: 10.0,
+                    pow_bits: vec![10.0; folding_factor],
+                    num_queries: 90,
+                    ood_samples: 1,
+                    log_inv_rate: 4,
+                },
+                RoundConfig {
+                    folding_factor,
+                    evaluation_domain_log_size: 11,
+                    queries_pow_bits: 10.0,
+                    pow_bits: vec![10.0; folding_factor],
+                    num_queries: 15,
+                    ood_samples: 1,
+                    log_inv_rate: 7,
+                },
+            ],
+            final_poly_log_degree: 4,
+            final_queries: 10,
+            final_pow_bits: 10.0,
+            final_folding_pow_bits: vec![10.0; 8],
+        }
+    }
+    pub fn big_beautiful_whir_config() -> Self {
+        let folding_factor = 4;
+        WhirProofShape::<F> {
+            domain_generator: F::two_adic_generator(21),
+            starting_ood_samples: 2,
+            starting_log_inv_rate: 1,
+            starting_interleaved_log_height: 20,
+            starting_domain_log_size: 21,
+            starting_folding_pow_bits: vec![0.; 10],
+            round_parameters: vec![
+                RoundConfig {
+                    folding_factor,
+                    evaluation_domain_log_size: 20,
+                    queries_pow_bits: 16.0,
+                    pow_bits: vec![0.0; folding_factor],
+                    num_queries: 84,
+                    ood_samples: 2,
+                    log_inv_rate: 4,
+                },
+                RoundConfig {
+                    folding_factor,
+                    evaluation_domain_log_size: 19,
+                    queries_pow_bits: 16.0,
+                    pow_bits: vec![0.0; folding_factor],
+                    num_queries: 21,
+                    ood_samples: 2,
+                    log_inv_rate: 7,
+                },
+                RoundConfig {
+                    folding_factor,
+                    evaluation_domain_log_size: 18,
+                    queries_pow_bits: 16.0,
+                    pow_bits: vec![0.0; folding_factor],
+                    num_queries: 12,
+                    ood_samples: 2,
+                    log_inv_rate: 10,
+                },
+            ],
+            final_poly_log_degree: 8,
+            final_queries: 9,
+            final_pow_bits: 16.0,
+            final_folding_pow_bits: vec![0.0; 8],
+        }
+    }
+}
+/// Round specific configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RoundConfig {
+    /// Folding factor for this round.
+    pub folding_factor: usize,
+    /// Size of evaluation domain (of oracle sent in this round)
+    pub evaluation_domain_log_size: usize,
+    /// Number of bits of proof of work (for the queries).
+    pub queries_pow_bits: f64,
+    /// Number of bits of proof of work (for the folding).
+    pub pow_bits: Vec<f64>,
+    /// Number of queries in this round
+    pub num_queries: usize,
+    /// Number of OOD samples in this round
+    pub ood_samples: usize,
+    /// Rate of current RS codeword
+    pub log_inv_rate: usize,
+}

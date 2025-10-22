@@ -1,0 +1,25 @@
+[package]
+name = "sp1-test"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+sp1-test-macro = { workspace = true }
+rand = { workspace = true }
+sha2-v0-9-8 = { workspace = true }
+parking_lot = { workspace = true }
+lazy_static = { workspace = true }
+sp1-sdk = { workspace = true, default-features = true, features = ["experimental"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+reqwest = { workspace = true, features = ["json"] }
+tokio = { workspace = true }
+color-eyre = { workspace = true }
+
+[target.'cfg(tokio_unstable)'.dependencies]
+console-subscriber = { workspace = true }
+
+[[bin]]
+name = "post-to-github"
+path = "bin/post_to_github.rs"

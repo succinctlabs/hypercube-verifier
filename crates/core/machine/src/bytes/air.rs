@@ -1,0 +1,55 @@
+use core::borrow::Borrow;
+
+use slop_air::{Air, BaseAir, PairBuilder};
+use slop_algebra::{AbstractField, Field};
+use slop_matrix::Matrix;
+use sp1_core_executor::ByteOpcode;
+use sp1_hypercube::air::SP1AirBuilder;
+
+use super::{
+    columns::{ByteMultCols, BytePreprocessedCols, NUM_BYTE_MULT_COLS},
+    ByteChip,
+};
+
+impl<F: Field> BaseAir<F> for ByteChip<F> {
+    fn width(&self) -> usize {
+        NUM_BYTE_MULT_COLS
+    }
+}
+
+impl<AB: SP1AirBuilder + PairBuilder> Air<AB> for ByteChip<AB::F> {
+    fn eval(&self, builder: &mut AB) {
+        let main = builder.main();
+        let local_mult = main.row_slice(0);
+        let local_mult: &ByteMultCols<AB::Var> = (*local_mult).borrow();
+
+        let prep = builder.preprocessed();
+        let prep = prep.row_slice(0);
+        let local: &BytePreprocessedCols<AB::Var> = (*prep).borrow();
+
+        // Send all the lookups for each operation.
+        for (i, opcode) in ByteOpcode::byte_table().iter().enumerate() {
+            let field_op = opcode.as_field::<AB::F>();
+            let mult = local_mult.multiplicities[i];
+            match opcode {
+                ByteOpcode::AND => {
+                    builder.receive_byte(field_op, local.and, local.b, local.c, mult)
+                }
+                ByteOpcode::OR => builder.receive_byte(field_op, local.or, local.b, local.c, mult),
+                ByteOpcode::XOR => {
+                    builder.receive_byte(field_op, local.xor, local.b, local.c, mult)
+                }
+                ByteOpcode::U8Range => {
+                    builder.receive_byte(field_op, AB::F::zero(), local.b, local.c, mult)
+                }
+                ByteOpcode::LTU => {
+                    builder.receive_byte(field_op, local.ltu, local.b, local.c, mult)
+                }
+                ByteOpcode::MSB => {
+                    builder.receive_byte(field_op, local.msb, local.b, AB::F::zero(), mult)
+                }
+                _ => panic!("invalid opcode found in byte table"),
+            }
+        }
+    }
+}

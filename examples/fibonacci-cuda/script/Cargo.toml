@@ -1,0 +1,19 @@
+[package]
+name = "fibonacci-cuda-script"
+version = { workspace = true }
+edition = { workspace = true }
+default-run = "fibonacci-cuda-script"
+publish = false
+
+[dependencies]
+hex = "0.4.3"
+sp1-cuda = { workspace = true, features = ["native"] }
+tokio = { workspace = true }
+sp1-sdk = { workspace = true, default-features = true }
+
+[build-dependencies]
+sp1-build = { workspace = true }
+
+[[bin]]
+name = "fibonacci-cuda-script"
+path = "src/main.rs"

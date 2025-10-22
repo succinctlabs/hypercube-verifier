@@ -1,0 +1,37 @@
+[package]
+name = "sp1-recursion-gnark-ffi"
+description = "SP1 is a performant, 100% open-source, contributor-friendly zkVM."
+readme = "../../../README.md"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[dependencies]
+slop-algebra = { workspace = true }
+slop-symmetric = { workspace = true }
+sp1-recursion-compiler = { workspace = true }
+sp1-primitives = { workspace = true }
+sp1-hypercube = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tempfile = { workspace = true }
+num-bigint = { workspace = true }
+cfg-if = { workspace = true }
+bincode = { workspace = true }
+anyhow = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+
+[build-dependencies]
+bindgen = { workspace = true }
+cfg-if = { workspace = true }
+
+[features]
+native = []
+
+[lints]
+workspace = true

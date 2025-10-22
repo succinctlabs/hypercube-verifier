@@ -1,0 +1,351 @@
+use std::{cell::UnsafeCell, ptr};
+
+use slop_algebra::AbstractField;
+use sp1_primitives::{types::RecursionProgramType, SP1ExtensionField, SP1Field};
+
+use super::{
+    Config, DslIr, DslIrBlock, Ext, ExtHandle, ExtOperations, Felt, FeltHandle, FeltOperations,
+    FromConstant, SymbolicExt, SymbolicFelt, SymbolicVar, Var, VarHandle, VarOperations, Variable,
+};
+
+#[derive(Debug, Clone)]
+pub(crate) struct InnerBuilder<C: Config> {
+    pub(crate) variable_count: u32,
+    pub operations: Vec<DslIr<C>>,
+}
+
+/// A builder for the DSL.
+///
+/// Can compile to both assembly and a set of constraints.
+#[derive(Debug)]
+pub struct Builder<C: Config> {
+    pub(crate) inner: Box<UnsafeCell<InnerBuilder<C>>>,
+    pub(crate) nb_public_values: Option<Var<C::N>>,
+    pub(crate) witness_var_count: u32,
+    pub(crate) witness_felt_count: u32,
+    pub(crate) witness_ext_count: u32,
+    pub(crate) var_handle: Box<VarHandle<C::N>>,
+    pub(crate) felt_handle: Box<FeltHandle<SP1Field>>,
+    pub(crate) ext_handle: Box<ExtHandle<SP1Field, SP1ExtensionField>>,
+    pub(crate) p2_hash_num: Var<C::N>,
+    pub(crate) debug: bool,
+    pub(crate) is_sub_builder: bool,
+    pub poseidon2_constants: Vec<Ext<SP1Field, SP1ExtensionField>>,
+    pub program_type: RecursionProgramType,
+}
+
+impl<C: Config> Default for Builder<C> {
+    fn default() -> Self {
+        let mut builder = Self::new(RecursionProgramType::Core);
+        C::initialize(&mut builder);
+        builder
+    }
+}
+
+impl<C: Config> Builder<C> {
+    pub fn new(program_type: RecursionProgramType) -> Self {
+        // We need to create a temporary placeholder for the p2_hash_num variable.
+        let placeholder_p2_hash_num = Var::new(0, ptr::null_mut());
+
+        let mut inner = Box::new(UnsafeCell::new(InnerBuilder {
+            variable_count: 0,
+            operations: Default::default(),
+        }));
+
+        let var_handle = Box::new(VarOperations::var_handle(&mut inner));
+        let mut ext_handle = Box::new(ExtOperations::ext_handle(&mut inner));
+        let felt_handle = Box::new(FeltOperations::felt_handle(
+            &mut inner,
+            ext_handle.as_mut() as *mut _ as *mut (),
+        ));
+
+        let mut new_builder = Self {
+            inner,
+            witness_var_count: 0,
+            witness_felt_count: 0,
+            witness_ext_count: 0,
+            nb_public_values: None,
+            var_handle,
+            felt_handle,
+            ext_handle,
+            p2_hash_num: placeholder_p2_hash_num,
+            debug: false,
+            is_sub_builder: false,
+            poseidon2_constants: vec![],
+            program_type,
+        };
+
+        new_builder.p2_hash_num = new_builder.uninit();
+        new_builder
+    }
+
+    /// Creates a new builder with a given number of counts for each type.
+    pub fn new_sub_builder(
+        variable_count: u32,
+        nb_public_values: Option<Var<C::N>>,
+        p2_hash_num: Var<C::N>,
+        debug: bool,
+        program_type: RecursionProgramType,
+    ) -> Self {
+        let mut builder = Self::new(program_type);
+        builder.inner.get_mut().variable_count = variable_count;
+        builder.nb_public_values = nb_public_values;
+        builder.p2_hash_num = p2_hash_num;
+        builder.debug = debug;
+
+        builder
+    }
+
+    /// Convenience function for creating a new sub builder.
+    pub fn sub_builder(&self) -> Self {
+        Builder::<C>::new_sub_builder(
+            self.variable_count(),
+            self.nb_public_values,
+            self.p2_hash_num,
+            self.debug,
+            self.program_type,
+        )
+    }
+
+    /// Pushes an operation to the builder.
+    #[inline(always)]
+    pub fn push_op(&mut self, op: DslIr<C>) {
+        self.inner.get_mut().operations.push(op);
+    }
+
+    pub fn extend_ops(&mut self, ops: impl IntoIterator<Item = DslIr<C>>) {
+        self.inner.get_mut().operations.extend(ops);
+    }
+
+    #[inline(always)]
+    // Record a trace if the "debug" feature is enabled.
+    pub fn push_backtrace(&mut self) {
+        #[cfg(feature = "debug")]
+        self.push_op(DslIr::DebugBacktrace(backtrace::Backtrace::new_unresolved()));
+    }
+
+    /// Pushes an operation to the builder and records a trace if the "debug" feature is enabled.
+    #[inline(always)]
+    pub fn push_traced_op(&mut self, op: DslIr<C>) {
+        self.push_backtrace();
+        self.push_op(op);
+    }
+
+    pub fn variable_count(&self) -> u32 {
+        unsafe { (*self.inner.get()).variable_count }
+    }
+
+    pub fn into_operations(self) -> Vec<DslIr<C>> {
+        self.inner.into_inner().operations
+    }
+
+    pub fn into_root_block(self) -> DslIrBlock<C> {
+        let addrs_written = 0..self.variable_count();
+        DslIrBlock { ops: self.inner.into_inner().operations, addrs_written }
+    }
+
+    /// Get a mutable reference to the list of operations.
+    /// Can be used for adjusting evaluation order using the utility functions from [`std::mem`].
+    ///
+    /// One use case is to move "lazy" evaluation out of a parallel context.
+    pub fn get_mut_operations(&mut self) -> &mut Vec<DslIr<C>> {
+        &mut self.inner.get_mut().operations
+    }
+
+    /// Creates an uninitialized variable.
+    pub fn uninit<V: Variable<C>>(&mut self) -> V {
+        V::uninit(self)
+    }
+
+    /// Evaluates an expression and returns a variable.
+    pub fn eval<V: Variable<C>, E: Into<V::Expression>>(&mut self, expr: E) -> V {
+        let dst = V::uninit(self);
+        dst.assign(expr.into(), self);
+        dst
+    }
+
+    /// Evaluates a constant expression and returns a variable.
+    pub fn constant<V: FromConstant<C>>(&mut self, value: V::Constant) -> V {
+        V::constant(value, self)
+    }
+
+    /// Assigns an expression to a variable.
+    pub fn assign<V: Variable<C>, E: Into<V::Expression>>(&mut self, dst: V, expr: E) {
+        dst.assign(expr.into(), self);
+    }
+
+    /// Asserts that two expressions are equal.
+    pub fn assert_eq<V: Variable<C>>(
+        &mut self,
+        lhs: impl Into<V::Expression>,
+        rhs: impl Into<V::Expression>,
+    ) {
+        V::assert_eq(lhs, rhs, self);
+    }
+
+    /// Asserts that two expressions are not equal.
+    pub fn assert_ne<V: Variable<C>>(
+        &mut self,
+        lhs: impl Into<V::Expression>,
+        rhs: impl Into<V::Expression>,
+    ) {
+        V::assert_ne(lhs, rhs, self);
+    }
+
+    /// Assert that two vars are equal.
+    pub fn assert_var_eq<LhsExpr: Into<SymbolicVar<C::N>>, RhsExpr: Into<SymbolicVar<C::N>>>(
+        &mut self,
+        lhs: LhsExpr,
+        rhs: RhsExpr,
+    ) {
+        self.assert_eq::<Var<C::N>>(lhs, rhs);
+    }
+
+    /// Assert that two vars are not equal.
+    pub fn assert_var_ne<LhsExpr: Into<SymbolicVar<C::N>>, RhsExpr: Into<SymbolicVar<C::N>>>(
+        &mut self,
+        lhs: LhsExpr,
+        rhs: RhsExpr,
+    ) {
+        self.assert_ne::<Var<C::N>>(lhs, rhs);
+    }
+
+    /// Assert that two felts are equal.
+    pub fn assert_felt_eq<
+        LhsExpr: Into<SymbolicFelt<SP1Field>>,
+        RhsExpr: Into<SymbolicFelt<SP1Field>>,
+    >(
+        &mut self,
+        lhs: LhsExpr,
+        rhs: RhsExpr,
+    ) {
+        self.assert_eq::<Felt<SP1Field>>(lhs, rhs);
+    }
+
+    /// Assert that two felts are not equal.
+    pub fn assert_felt_ne<
+        LhsExpr: Into<SymbolicFelt<SP1Field>>,
+        RhsExpr: Into<SymbolicFelt<SP1Field>>,
+    >(
+        &mut self,
+        lhs: LhsExpr,
+        rhs: RhsExpr,
+    ) {
+        self.assert_ne::<Felt<SP1Field>>(lhs, rhs);
+    }
+
+    /// Assert that two exts are equal.
+    pub fn assert_ext_eq<
+        LhsExpr: Into<SymbolicExt<SP1Field, SP1ExtensionField>>,
+        RhsExpr: Into<SymbolicExt<SP1Field, SP1ExtensionField>>,
+    >(
+        &mut self,
+        lhs: LhsExpr,
+        rhs: RhsExpr,
+    ) {
+        self.assert_eq::<Ext<SP1Field, SP1ExtensionField>>(lhs, rhs);
+    }
+
+    /// Assert that two exts are not equal.
+    pub fn assert_ext_ne<
+        LhsExpr: Into<SymbolicExt<SP1Field, SP1ExtensionField>>,
+        RhsExpr: Into<SymbolicExt<SP1Field, SP1ExtensionField>>,
+    >(
+        &mut self,
+        lhs: LhsExpr,
+        rhs: RhsExpr,
+    ) {
+        self.assert_ne::<Ext<SP1Field, SP1ExtensionField>>(lhs, rhs);
+    }
+
+    pub fn print_debug(&mut self, val: usize) {
+        let constant = self.eval(C::N::from_canonical_usize(val));
+        self.print_v(constant);
+    }
+
+    /// Print a variable.
+    pub fn print_v(&mut self, dst: Var<C::N>) {
+        self.push_op(DslIr::PrintV(dst));
+    }
+
+    /// Print a felt.
+    pub fn print_f(&mut self, dst: Felt<SP1Field>) {
+        self.push_op(DslIr::PrintF(dst));
+    }
+
+    /// Print an ext.
+    pub fn print_e(&mut self, dst: Ext<SP1Field, SP1ExtensionField>) {
+        self.push_op(DslIr::PrintE(dst));
+    }
+
+    pub fn witness_var(&mut self) -> Var<C::N> {
+        assert!(!self.is_sub_builder, "Cannot create a witness var with a sub builder");
+        let witness = self.uninit();
+        self.push_op(DslIr::WitnessVar(witness, self.witness_var_count));
+        self.witness_var_count += 1;
+        witness
+    }
+
+    pub fn witness_felt(&mut self) -> Felt<SP1Field> {
+        assert!(!self.is_sub_builder, "Cannot create a witness felt with a sub builder");
+        let witness = self.uninit();
+        self.push_op(DslIr::WitnessFelt(witness, self.witness_felt_count));
+        self.witness_felt_count += 1;
+        witness
+    }
+
+    pub fn witness_ext(&mut self) -> Ext<SP1Field, SP1ExtensionField> {
+        assert!(!self.is_sub_builder, "Cannot create a witness ext with a sub builder");
+        let witness = self.uninit();
+        self.push_op(DslIr::WitnessExt(witness, self.witness_ext_count));
+        self.witness_ext_count += 1;
+        witness
+    }
+
+    /// Throws an error.
+    pub fn error(&mut self) {
+        self.push_traced_op(DslIr::Error());
+    }
+
+    /// Register and commits a felt as public value.  This value will be constrained when verified.
+    pub fn commit_public_value(&mut self, val: Felt<SP1Field>) {
+        assert!(!self.is_sub_builder, "Cannot commit to a public value with a sub builder");
+        if self.nb_public_values.is_none() {
+            self.nb_public_values = Some(self.eval(C::N::zero()));
+        }
+        let nb_public_values = *self.nb_public_values.as_ref().unwrap();
+
+        self.push_op(DslIr::Commit(val, nb_public_values));
+        self.assign(nb_public_values, nb_public_values + C::N::one());
+    }
+
+    pub fn commit_vkey_hash_circuit(&mut self, var: Var<C::N>) {
+        self.push_op(DslIr::CircuitCommitVkeyHash(var));
+    }
+
+    pub fn commit_committed_values_digest_circuit(&mut self, var: Var<C::N>) {
+        self.push_op(DslIr::CircuitCommitCommittedValuesDigest(var));
+    }
+
+    pub fn commit_exit_code_circuit(&mut self, var: Var<C::N>) {
+        self.push_op(DslIr::CircuitCommitExitCode(var));
+    }
+
+    pub fn commit_proof_nonce_circuit(&mut self, var: Var<C::N>) {
+        self.push_op(DslIr::CircuitCommitProofNonce(var));
+    }
+
+    pub fn commit_vk_root_circuit(&mut self, var: Var<C::N>) {
+        self.push_op(DslIr::CircuitCommitVkRoot(var));
+    }
+
+    pub fn reduce_e(&mut self, ext: Ext<SP1Field, SP1ExtensionField>) {
+        self.push_op(DslIr::ReduceE(ext));
+    }
+
+    pub fn felt2var_circuit(&mut self, felt: Felt<SP1Field>) -> Var<C::N> {
+        let var = self.uninit();
+        self.push_op(DslIr::CircuitFelt2Var(felt, var));
+        var
+    }
+}

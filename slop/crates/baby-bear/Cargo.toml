@@ -1,0 +1,18 @@
+[package]
+name = "slop-baby-bear"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+p3-baby-bear = { workspace = true }
+slop-algebra = {workspace = true}
+slop-poseidon2 = {workspace = true}
+slop-symmetric = { workspace = true }
+slop-challenger = { workspace = true }
+
+serde = { workspace = true, features = ["derive"] }
+lazy_static = { workspace = true }

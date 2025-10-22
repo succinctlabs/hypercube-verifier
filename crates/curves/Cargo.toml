@@ -1,0 +1,37 @@
+[package]
+name = "sp1-curves"
+description = "SP1 is a performant, 100% open-source, contributor-friendly zkVM."
+readme = "../../README.md"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[dependencies]
+num = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+typenum = { workspace = true }
+k256 = { workspace = true, features = ["expose-field"] }
+p256 = { workspace = true, features = ["expose-field"] }
+generic-array = { workspace = true, features = ["alloc", "serde"] }
+amcl = { workspace = true, features = ["bls381"] }
+elliptic-curve = { workspace = true }
+dashu = { workspace = true }
+
+sp1-primitives = { workspace = true }
+slop-algebra = { workspace = true }
+itertools = { workspace = true }
+rug = { workspace = true, optional = true }
+cfg-if = { workspace = true }
+
+[dev-dependencies]
+rand = { workspace = true }
+num = { workspace = true, features = ["rand"] }
+
+[features]
+bigint-rug = ["rug"]
+
+[lints]
+workspace = true

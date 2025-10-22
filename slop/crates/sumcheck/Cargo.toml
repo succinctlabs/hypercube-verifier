@@ -1,0 +1,25 @@
+[package]
+name = "slop-sumcheck"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+slop-challenger = { workspace = true }
+slop-baby-bear = { workspace = true }
+slop-alloc = { workspace = true }
+
+slop-algebra = { workspace = true }
+slop-multilinear = { workspace = true }
+rayon = { workspace = true }
+serde = { workspace = true }
+itertools = { workspace = true }
+futures = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+rand = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt"] }

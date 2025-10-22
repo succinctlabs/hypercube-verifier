@@ -1,0 +1,19 @@
+[package]
+name = "sp1-build"
+description = "Build an SP1 program."
+readme = "README.md"
+
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[dependencies]
+sp1-primitives = { workspace = true }
+cargo_metadata = { workspace = true }
+anyhow = { workspace = true }
+clap = { workspace = true, features = ["derive", "env"] }
+dirs = { workspace = true }
+chrono = { workspace = true, features = ["clock"] }

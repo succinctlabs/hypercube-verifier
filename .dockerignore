@@ -1,0 +1,11 @@
+**/target/**
+Dockerfile*
+.dockerignore
+.git
+.gitignore
+examples
+tests
+target
+assets
+audits
+.github

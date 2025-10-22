@@ -1,0 +1,7 @@
+[workspace]
+# Disable git releases for all packages by default
+git_release_enable = false
+# Disable git tags for all packages by default
+git_tag_enable = false
+# Don't verify package build
+publish_no_verify = true

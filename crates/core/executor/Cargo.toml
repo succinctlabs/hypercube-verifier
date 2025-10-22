@@ -1,0 +1,71 @@
+[package]
+name = "sp1-core-executor"
+description = "SP1 is a performant, 100% open-source, contributor-friendly zkVM."
+readme = "../../../README.md"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[dependencies]
+# sp1
+sp1-primitives = { workspace = true }
+sp1-curves = { workspace = true }
+sp1-hypercube = { workspace = true }
+
+# slop (replaced p3 dependencies)
+slop-algebra = { workspace = true }
+slop-maybe-rayon = { workspace = true }
+slop-air = { workspace = true }
+slop-symmetric = { workspace = true }
+# misc
+serde = { workspace = true, features = ["derive", "rc"] }
+serde_json = { workspace = true }
+elf = { workspace = true }
+rrs-lib = { workspace = true }
+eyre = { workspace = true }
+bincode = { workspace = true }
+hashbrown = { workspace = true, features = ["serde", "inline-more"] }
+itertools = { workspace = true }
+num = { workspace = true }
+typenum = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+strum = { workspace = true, features = ["derive"] }
+hex = { workspace = true }
+bytemuck = { workspace = true }
+tiny-keccak = { workspace = true, features = ["keccak"] }
+vec_map = { workspace = true, features = ["serde"] }
+enum-map = { workspace = true, features = ["serde"] }
+clap = { workspace = true, features = ["derive"] }
+subenum = { workspace = true }
+serde_arrays = { workspace = true }
+deepsize2 = { workspace = true }
+memmap2 = { workspace = true }
+cfg-if = { workspace = true }
+
+# profiling
+goblin = { workspace = true, optional = true }
+rustc-demangle = { workspace = true, optional = true }
+gecko_profile = { workspace = true, optional = true }
+indicatif = { workspace = true, optional = true }
+
+sp1-jit = { workspace = true }
+
+[dev-dependencies]
+sp1-zkvm = { workspace = true, features = ["lib"] }
+test-artifacts = { workspace = true }
+
+[features]
+bigint-rug = ["sp1-curves/bigint-rug"]
+profiling = [
+  "dep:goblin",
+  "dep:rustc-demangle",
+  "dep:gecko_profile",
+  "dep:indicatif",
+]
+
+[lints]
+workspace = true

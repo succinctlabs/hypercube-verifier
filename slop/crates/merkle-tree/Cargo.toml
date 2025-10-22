@@ -1,0 +1,39 @@
+[package]
+name = "slop-merkle-tree"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+p3-merkle-tree = { workspace = true }
+slop-futures = { workspace = true }
+
+slop-commit = { workspace = true }
+slop-challenger = { workspace = true }
+slop-symmetric = { workspace = true }
+slop-poseidon2 = { workspace = true }
+slop-baby-bear = { workspace = true }
+slop-algebra = { workspace = true }
+slop-tensor = { workspace = true }
+slop-alloc = { workspace = true }
+slop-matrix = { workspace = true }
+slop-bn254 = { workspace = true }
+slop-koala-bear = { workspace = true }
+
+thiserror = { workspace = true }
+serde = { workspace = true }
+itertools = { workspace = true }
+derive-where = { workspace = true }
+tokio = { workspace = true, features = ["sync"] }
+
+# For Bn254 setup
+zkhash = { workspace = true }
+ff = { workspace = true, features = ["derive", "derive_bits"] }
+
+
+[dev-dependencies]
+rand = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt"] }

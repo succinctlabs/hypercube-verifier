@@ -1,0 +1,280 @@
+[workspace.package]
+version = "6.0.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/succinctlabs/sp1"
+keywords = ["sp1", "succinct", "zero-knowledge", "zkvm"]
+categories = ["cryptography"]
+include = ["SP1_VERSION"]
+
+[workspace]
+members = [
+  "crates/build",
+  "crates/cli",
+  "crates/core/compiler",
+  "crates/core/executor",
+  "crates/core/jit",
+  "crates/core/machine",
+  "crates/cuda",
+  "crates/curves",
+  "crates/derive",
+  "crates/helper",
+  "crates/hypercube",
+  "crates/perf",
+  "crates/primitives",
+  "crates/prover",
+  "crates/recursion/circuit",
+  "crates/recursion/compiler",
+  "crates/recursion/executor",
+  "crates/recursion/gnark-cli",
+  "crates/recursion/gnark-ffi",
+  "crates/recursion/machine",
+  "crates/sdk",
+  "crates/test-artifacts",
+  "crates/verifier",
+  "crates/zkvm/*",
+  "slop/crates/air",
+  "slop/crates/algebra",
+  "slop/crates/alloc",
+  "slop/crates/baby-bear",
+  "slop/crates/basefold-prover",
+  "slop/crates/basefold",
+  "slop/crates/bn254",
+  "slop/crates/challenger",
+  "slop/crates/commit",
+  "slop/crates/dft",
+  "slop/crates/fri",
+  "slop/crates/futures",
+  "slop/crates/jagged",
+  "slop/crates/keccak-air",
+  "slop/crates/koala-bear",
+  "slop/crates/matrix",
+  "slop/crates/maybe-rayon",
+  "slop/crates/merkle-tree",
+  "slop/crates/multilinear",
+  "slop/crates/pgspcs",
+  "slop/crates/poseidon2",
+  "slop/crates/spartan",
+  "slop/crates/stacked",
+  "slop/crates/sumcheck",
+  "slop/crates/symmetric",
+  "slop/crates/tensor",
+  "slop/crates/uni-stark",
+  "slop/crates/utils",
+  "slop/crates/whir",
+]
+exclude = [
+  "examples/target",
+  "crates/eval",
+  # "crates/verifier",
+]
+resolver = "2"
+
+[profile.release]
+opt-level = 3
+
+[profile.bench]
+opt-level = 3
+
+[profile.fast]
+inherits = "release"
+debug = true
+debug-assertions = true
+
+[workspace.dependencies]
+sp1-build = { path = "crates/build" }
+sp1-cli = { path = "crates/cli", default-features = false }
+sp1-core-executor = { path = "crates/core/executor" }
+sp1-core-machine = { path = "crates/core/machine" }
+sp1-cuda = { path = "crates/cuda" }
+sp1-curves = { path = "crates/curves" }
+sp1-derive = { path = "crates/derive" }
+# sp1-eval = { path = "crates/eval" }
+sp1-helper = { path = "crates/helper", default-features = false }
+sp1-hypercube = { path = "crates/hypercube" }
+sp1-jit = { path = "crates/core/jit" }
+sp1-lib = { path = "crates/zkvm/lib", default-features = false }
+sp1-primitives = { path = "crates/primitives" }
+sp1-prover = { path = "crates/prover" }
+sp1-recursion-circuit = { path = "crates/recursion/circuit", default-features = false }
+sp1-recursion-compiler = { path = "crates/recursion/compiler" }
+sp1-recursion-executor = { path = "crates/recursion/executor", default-features = false }
+sp1-recursion-gnark-ffi = { path = "crates/recursion/gnark-ffi", default-features = false }
+sp1-recursion-machine = { path = "crates/recursion/machine", default-features = false }
+sp1-sdk = { path = "crates/sdk", default-features = false }
+sp1-verifier = { path = "crates/verifier", default-features = false }
+sp1-zkvm = { path = "crates/zkvm/entrypoint", default-features = false }
+
+p3-air = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-baby-bear = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6", features = [
+  "nightly-features",
+] }
+p3-bn254-fr = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-challenger = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-commit = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-dft = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-field = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-fri = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-keccak-air = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-koala-bear = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-matrix = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-maybe-rayon = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6", features = [
+  "parallel",
+] }
+p3-merkle-tree = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-poseidon2 = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-symmetric = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-uni-stark = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+p3-util = { git = "https://github.com/Plonky3/Plonky3/", branch = "sp1-v6" }
+
+slop-air = { path = "./slop/crates/air" }
+slop-algebra = { path = "./slop/crates/algebra" }
+slop-alloc = { path = "./slop/crates/alloc" }
+slop-baby-bear = { path = "./slop/crates/baby-bear" }
+slop-basefold = { path = "./slop/crates/basefold" }
+slop-basefold-prover = { path = "./slop/crates/basefold-prover" }
+slop-bn254 = { path = "./slop/crates/bn254" }
+slop-challenger = { path = "./slop/crates/challenger" }
+slop-commit = { path = "./slop/crates/commit" }
+slop-dft = { path = "./slop/crates/dft" }
+slop-fri = { path = "./slop/crates/fri" }
+slop-futures = { path = "./slop/crates/futures" }
+slop-jagged = { path = "./slop/crates/jagged" }
+slop-keccak-air = { path = "./slop/crates/keccak-air" }
+slop-koala-bear = { path = "./slop/crates/koala-bear" }
+slop-matrix = { path = "./slop/crates/matrix" }
+slop-maybe-rayon = { path = "./slop/crates/maybe-rayon" }
+slop-merkle-tree = { path = "./slop/crates/merkle-tree" }
+slop-multilinear = { path = "./slop/crates/multilinear" }
+slop-pgspcs = { path = "./slop/crates/pgspcs" }
+slop-poseidon2 = { path = "./slop/crates/poseidon2" }
+slop-spartan = { path = "./slop/crates/spartan" }
+slop-stacked = { path = "./slop/crates/stacked" }
+slop-sumcheck = { path = "./slop/crates/sumcheck" }
+slop-symmetric = { path = "./slop/crates/symmetric" }
+slop-tensor = { path = "./slop/crates/tensor" }
+slop-uni-stark = { path = "./slop/crates/uni-stark" }
+slop-utils = { path = "./slop/crates/utils" }
+slop-whir = { path = "./slop/crates/whir" }
+
+# For testing.
+test-artifacts = { path = "crates/test-artifacts" }
+tokio-test = "0.4.4"
+rstest = "0.26.0"
+
+# misc
+alloy-primitives = { version = "1.0", default-features = false }
+amcl = { package = "snowbridge-amcl", version = "1.0.2", default-features = false }
+anyhow = "1.0.86"
+arrayref = "0.3.8"
+arrayvec = "0.7.6"
+async-trait = "0.1.81"
+dashmap = "6.1.0"
+backoff = "0.4"
+backtrace = "0.3.71"
+bincode = "1.3.3"
+bindgen = "0.70.1"
+blake3 = { version = "1.6.1", default-features = false }
+bytemuck = "1.16.3"
+bytes = "1.10.1"
+cargo_metadata = "0.18.1"
+cfg-if = "1.0.3"
+chrono = { version = "0.4.38", default-features = false }
+clap = "4.5.9"
+critical-section = "1.2.0"
+crossbeam = "0.8.4"
+dashu = "0.4.2"
+deepsize2 = { version = "0.1.0", features = ["hashbrown"] }
+derive-where = { version = "1.5.0", features = ["serde"] }
+dirs = "5.0.1"
+downloader = { version = "0.2", default-features = false }
+dynasmrt = "3.2.0"
+elf = "0.7.4"
+elliptic-curve = "0.13.8"
+embedded-alloc = "0.6.0"
+enum-map = "2.7.3"
+eventsource-stream = "0.2.0"
+eyre = "0.6.12"
+ff = "0.13"
+futures = "0.3"
+gecko_profile = "0.4.0"
+generic-array = "=1.1.0"
+getrandom_v2 = { package = "getrandom", version = "0.2.15", default-features = false }
+getrandom_v3 = { package = "getrandom", version = "0.3.3", default-features = false }
+goblin = "0.9"
+hashbrown = "0.14.5"
+hex = "0.4.3"
+indicatif = "0.17.8"
+itertools = "0.13.0"
+k256 = "0.13.4"
+lazy_static = "1.5.0"
+libm = "0.2.8"
+lru = "0.12.4"
+memfd = "0.6.4"
+memmap2 = "0.9.8"
+num = "0.4.3"
+num_cpus = "1.16.0"
+num-bigint = { version = "0.4.6", default-features = false }
+num-traits = "0.2.19"
+p256 = "0.13.2"
+pin-project = "1"
+proc-macro2 = "1.0"
+prost = "0.13"
+quote = "1.0"
+rand = "0.8.5"
+range-set-blaze = "0.1.16"
+rayon = "1.10.0"
+rayon-scan = "0.1.1"
+reqwest = { version = "0.12.12", default-features = false }
+reqwest-middleware = "0.3.2"
+rrs-lib = { git = "https://github.com/succinctlabs/rrs-succinct.git", branch = "gautham/rv64executor-2" }
+rug = "1.26.1"
+rustc-demangle = "0.1.18"
+semver = "1.0.26"
+serde = { version = "1.0.204", features = ["derive"] }
+serde_arrays = "0.2"
+serde_json = "1.0.132"
+serial_test = "3.1.1"
+sha2 = "0.10.8"
+smallvec = "1.13.2"
+static_assertions = "1.1.0"
+strum = "0.27.1"
+strum_macros = "0.27.1"
+subenum = "1.1.2"
+syn = "1.0"
+sysinfo = "0.30.13"
+target-lexicon = "0.12.15"
+tempfile = "3.10.1"
+thiserror = "1.0"
+tiny-keccak = "2.0.2"
+tokio = { version = "1.42.0", default-features = false }
+tonic = "0.12"
+tracing = "0.1.40"
+tracing-appender = "0.2.3"
+tracing-forest = "0.1.6"
+tracing-subscriber = "0.3.18"
+opentelemetry = "0.23.0"
+tracing-opentelemetry = "0.24.0"
+transpose = "0.2.3"
+twirp = { package = "twirp-rs", version = "0.13.0-succinct" }
+mti = "1.0.7-beta.1"
+typenum = "1.17.0"
+uuid = "1.17.0"
+vec_map = "0.8.2"
+vergen = { version = "8", default-features = false }
+yansi = "1.0.1"
+zkhash = "0.2.0"
+
+
+[workspace.metadata.typos]
+default.extend-ignore-re = [
+  "Jo-Philipp Wich",
+  "SubEIN",
+  "DivEIN",
+  "CommitCommitedValuesDigest",
+  "numer",
+]
+default.extend-ignore-words-re = ["(?i)groth", "TRE"]
+
+[workspace.lints.clippy]
+print_stdout = "deny"

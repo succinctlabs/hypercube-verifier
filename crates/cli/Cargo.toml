@@ -1,0 +1,38 @@
+[package]
+name = "sp1-cli"
+description = "The CLI is used for various tasks related to SP1, such as building the toolchain, compiling programs, and tracing programs."
+readme = "README.md"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[build-dependencies]
+vergen = { workspace = true, features = ["build", "git", "git2"] }
+
+[dependencies]
+
+anyhow = { workspace = true, features = ["backtrace"] }
+clap = { workspace = true, features = ["derive", "env"] }
+sp1-build = { workspace = true, optional = true }
+sp1-sdk = { workspace = true, optional = true }
+reqwest = { workspace = true, features = ["stream", "json", "rustls-tls"] }
+tokio = { workspace = true, features = ["full"] }
+dirs = { workspace = true }
+rand = { workspace = true }
+serde_json = { workspace = true }
+yansi = { workspace = true }
+target-lexicon = { workspace = true }
+cargo_metadata = { workspace = true }
+indicatif = { workspace = true }
+futures = { workspace = true }
+
+[features]
+default = ["full"]
+full = ["dep:sp1-build", "dep:sp1-sdk"]
+
+[[bin]]
+name = "cargo-prove"
+path = "src/bin/cargo-prove.rs"

@@ -1,0 +1,29 @@
+[package]
+name = "tendermint-script"
+version = { workspace = true }
+edition = { workspace = true }
+publish = false
+
+[dependencies]
+sp1-sdk = { workspace = true, default-features = true }
+tracing = "0.1"
+
+sp1-prover = { path = "../../../crates/prover" }
+
+sp1-core-executor = { workspace = true }
+sp1-build = { workspace = true }
+sp1-core-machine = { workspace = true }
+sp1-primitives = { workspace = true }
+serde_json = { workspace = true }
+tendermint-light-client-verifier = { version = "0.35.0", default-features = false, features = [
+  "rust-crypto",
+] }
+serde_cbor = "0.11.2"
+tokio = { workspace = true }
+
+[build-dependencies]
+sp1-build = { workspace = true }
+
+[[bin]]
+name = "core_u64"
+path = "bin/core_u64.rs"

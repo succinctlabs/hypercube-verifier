@@ -1,0 +1,26 @@
+[package]
+name = "sp1-lib"
+description = "SP1 is a performant, 100% open-source, contributor-friendly zkVM."
+readme = "../../../README.md"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[dependencies]
+bincode = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+sp1-primitives = { workspace = true }
+
+# ecdsa
+elliptic-curve = { workspace = true, features = ["hazmat", "sec1", "ecdh"], optional = true }
+
+[features]
+default = ["ecdsa"]
+ecdsa = ["dep:elliptic-curve"]
+verify = []
+
+[lints]
+workspace = true

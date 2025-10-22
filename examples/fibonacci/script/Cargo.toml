@@ -1,0 +1,47 @@
+[package]
+name = "fibonacci-script"
+version = { workspace = true }
+edition = { workspace = true }
+default-run = "fibonacci-script"
+publish = false
+
+[dependencies]
+hex = "0.4.3"
+sp1-sdk = { workspace = true, default-features = true }
+tokio = { workspace = true }
+sp1-prover = { workspace = true }
+sp1-core-executor = { workspace = true }
+sp1-build = { workspace = true }
+sp1-core-machine = { workspace = true }
+sp1-primitives = { workspace = true }
+tracing = "0.1"
+[build-dependencies]
+sp1-build = { workspace = true }
+
+[[bin]]
+name = "plonk_bn254"
+path = "bin/plonk_bn254.rs"
+
+[[bin]]
+name = "groth16_bn254"
+path = "bin/groth16_bn254.rs"
+
+[[bin]]
+name = "compressed"
+path = "bin/compressed.rs"
+
+[[bin]]
+name = "core_u64"
+path = "bin/core_u64.rs"
+
+[[bin]]
+name = "execute"
+path = "bin/execute.rs"
+
+[[bin]]
+name = "network"
+path = "bin/network.rs"
+
+[[bin]]
+name = "fibonacci-script"
+path = "src/main.rs"

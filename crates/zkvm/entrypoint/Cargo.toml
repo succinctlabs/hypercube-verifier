@@ -1,0 +1,39 @@
+[package]
+name = "sp1-zkvm"
+description = "SP1 is a performant, 100% open-source, contributor-friendly zkVM."
+readme = "../../../README.md"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+
+[dependencies]
+cfg-if = { workspace = true }
+getrandom_v2 = { workspace = true, features = ["custom"] }
+getrandom_v3 = { workspace = true }
+rand = { workspace = true }
+libm = { workspace = true, optional = true }
+sha2 = { workspace = true }
+lazy_static = { workspace = true }
+embedded-alloc = { workspace = true }
+critical-section = { workspace = true }
+
+# optional
+sp1-lib = { workspace = true, optional = true }
+sp1-primitives = { workspace = true }
+slop-algebra = { workspace = true, optional = true }
+blake3 = { workspace = true, optional = true }
+
+[features]
+default = ["libm", "lib"]
+libm = ["dep:libm"]
+lib = ["dep:sp1-lib"]
+bump = []
+verify = ["dep:slop-algebra", "sp1-lib/verify"]
+blake3 = ["dep:blake3"]
+untrusted_programs = []
+
+[lints]
+workspace = true

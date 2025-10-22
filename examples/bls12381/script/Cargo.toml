@@ -1,0 +1,11 @@
+[package]
+version = "0.1.0"
+name = "bls12381-script"
+edition = "2021"
+
+[dependencies]
+sp1-sdk = { path = "../../../crates/sdk" }
+tokio = { workspace = true }
+
+[build-dependencies]
+sp1-build = { workspace = true }
