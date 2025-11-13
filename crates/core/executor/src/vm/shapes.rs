@@ -154,7 +154,7 @@ impl ShapeChecker {
         self.heights[RiscvAirId::MemoryLocal] += touched_addresses;
         self.max_height = self.max_height.max(self.heights[RiscvAirId::MemoryLocal]);
 
-        // Incrmenet for all the global interactions
+        // Increment for all the global interactions
         self.trace_area +=
             self.costs[RiscvAirId::Global] * (2 * touched_addresses + syscall_sent as u64);
         self.heights[RiscvAirId::Global] += 2 * touched_addresses + syscall_sent as u64;

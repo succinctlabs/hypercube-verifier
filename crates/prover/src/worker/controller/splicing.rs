@@ -196,7 +196,7 @@ where
             loop {
                 tracing::debug!("starting new shard at clk: {} at pc: {}", vm.core.clk(), vm.core.pc());
                 match vm.execute()? {
-                    CycleResult::ShardBoundry => {
+                    CycleResult::ShardBoundary => {
                         // Note: Chunk implentations should always be cheap to clone.
                         if let Some(spliced) = vm.splice(chunk.clone()) {
                             tracing::debug!(global_clk = vm.core.global_clk(), pc = vm.core.pc(), num_mem_reads_left = vm.core.mem_reads.len(), clk = vm.core.clk(), "shard boundary");

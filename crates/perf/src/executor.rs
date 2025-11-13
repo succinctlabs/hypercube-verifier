@@ -194,7 +194,7 @@
 //             let mut last_spliced_trace =
 // SplicedMinimalTrace::new_full_trace(minimal_trace.clone());             let mut splice_duration =
 // Duration::ZERO;             let mut splice_timer = Instant::now();
-//             while let CycleResult::ShardBoundry =
+//             while let CycleResult::ShardBoundary =
 //                 splicing_vm.execute().expect("failed to execute chunk")
 //             {
 //                 if let Some(spliced) = splicing_vm.splice(minimal_trace.clone()) {

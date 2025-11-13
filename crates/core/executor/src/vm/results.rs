@@ -95,7 +95,7 @@ pub enum CycleResult {
     /// The trace has ended at this cycle.
     TraceEnd,
     /// The shard has overflowed at this cycle.
-    ShardBoundry,
+    ShardBoundary,
 }
 
 impl CycleResult {
@@ -108,7 +108,7 @@ impl CycleResult {
     /// Returns true if the program has hit a shard boundary.
     #[must_use]
     pub fn is_shard_boundry(self) -> bool {
-        matches!(self, CycleResult::ShardBoundry)
+        matches!(self, CycleResult::ShardBoundary)
     }
 
     /// Returns true if the trace has ended at this cycle.

@@ -45,14 +45,14 @@ impl SplicingVM<'_> {
 
             // If were not already done, ensure that we dont have a shard boundary.
             if !result.is_done() && self.shape_checker.check_shard_limit() {
-                result = CycleResult::ShardBoundry;
+                result = CycleResult::ShardBoundary;
             }
 
             match result {
                 CycleResult::Done(false) => {}
-                CycleResult::ShardBoundry | CycleResult::TraceEnd => {
+                CycleResult::ShardBoundary | CycleResult::TraceEnd => {
                     self.start_new_shard();
-                    return Ok(CycleResult::ShardBoundry);
+                    return Ok(CycleResult::ShardBoundary);
                 }
                 CycleResult::Done(true) => {
                     return Ok(CycleResult::Done(true));
@@ -138,7 +138,7 @@ impl SplicingVM<'_> {
         Ok(self.core.advance())
     }
 
-    /// Splice a min imal trace, outputting a minimal trace for the NEXT shard.
+    /// Splice a minimal trace, outputting a minimal trace for the NEXT shard.
     pub fn splice<T: MinimalTrace>(&self, trace: T) -> Option<SplicedMinimalTrace<T>> {
         // If the trace has been exhausted, then the last splice is all thats needed.
         if self.core.is_trace_end() || self.core.is_done() {

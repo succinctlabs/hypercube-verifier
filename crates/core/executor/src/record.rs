@@ -151,6 +151,45 @@ impl ExecutionRecord {
         result
     }
 
+    /// Create a new [`ExecutionRecord`] with preallocated event vecs.
+    #[must_use]
+    pub fn new_preallocated(
+        program: Arc<Program>,
+        proof_nonce: [u32; PROOF_NONCE_NUM_WORDS],
+    ) -> Self {
+        // TODO: better estimates of each event size.
+        const BIG_EVENT: usize = 1 << 21;
+        // const MEDIUM_EVENT: usize = 1 << 19;
+
+        let mut result = Self { program, ..Default::default() };
+
+        result.add_events.reserve(BIG_EVENT);
+        result.addi_events.reserve(BIG_EVENT);
+        result.addw_events.reserve(BIG_EVENT);
+        result.mul_events.reserve(BIG_EVENT);
+        result.sub_events.reserve(BIG_EVENT);
+        result.subw_events.reserve(BIG_EVENT);
+        result.divrem_events.reserve(BIG_EVENT);
+        result.lt_events.reserve(BIG_EVENT);
+        result.branch_events.reserve(BIG_EVENT);
+        result.jal_events.reserve(BIG_EVENT);
+        result.jalr_events.reserve(BIG_EVENT);
+        result.utype_events.reserve(BIG_EVENT);
+        result.memory_load_byte_events.reserve(BIG_EVENT);
+        result.memory_load_half_events.reserve(BIG_EVENT);
+        result.memory_load_word_events.reserve(BIG_EVENT);
+        result.memory_load_double_events.reserve(BIG_EVENT);
+        result.memory_store_byte_events.reserve(BIG_EVENT);
+        result.memory_store_word_events.reserve(BIG_EVENT);
+        result.memory_store_double_events.reserve(BIG_EVENT);
+        result.global_memory_initialize_events.reserve(BIG_EVENT);
+        result.global_memory_finalize_events.reserve(BIG_EVENT);
+        result.global_interaction_events.reserve(BIG_EVENT);
+
+        result.public_values.proof_nonce = proof_nonce;
+        result
+    }
+
     /// Take out events from the [`ExecutionRecord`] that should be deferred to a separate shard.
     ///
     /// Note: we usually defer events that would increase the recursion cost significantly if
@@ -434,6 +473,61 @@ impl ExecutionRecord {
     pub fn get_local_page_prot_events(&self) -> impl Iterator<Item = &PageProtLocalEvent> {
         let precompile_local_page_prot_events = self.precompile_events.get_local_page_prot_events();
         precompile_local_page_prot_events.chain(self.cpu_local_page_prot_access.iter())
+    }
+
+    /// Reset the record, without deallocating the event vecs.
+    #[inline]
+    pub fn reset(&mut self) {
+        self.add_events.truncate(0);
+        self.addw_events.truncate(0);
+        self.addi_events.truncate(0);
+        self.mul_events.truncate(0);
+        self.sub_events.truncate(0);
+        self.subw_events.truncate(0);
+        self.bitwise_events.truncate(0);
+        self.shift_left_events.truncate(0);
+        self.shift_right_events.truncate(0);
+        self.divrem_events.truncate(0);
+        self.lt_events.truncate(0);
+        self.memory_load_byte_events.truncate(0);
+        self.memory_load_half_events.truncate(0);
+        self.memory_load_word_events.truncate(0);
+        self.memory_load_x0_events.truncate(0);
+        self.memory_load_double_events.truncate(0);
+        self.memory_store_byte_events.truncate(0);
+        self.memory_store_half_events.truncate(0);
+        self.memory_store_word_events.truncate(0);
+        self.memory_store_double_events.truncate(0);
+        self.utype_events.truncate(0);
+        self.branch_events.truncate(0);
+        self.jal_events.truncate(0);
+        self.jalr_events.truncate(0);
+        self.byte_lookups.clear();
+        self.precompile_events = PrecompileEvents::default();
+        self.global_memory_initialize_events.truncate(0);
+        self.global_memory_finalize_events.truncate(0);
+        self.global_page_prot_initialize_events.truncate(0);
+        self.global_page_prot_finalize_events.truncate(0);
+        self.cpu_local_memory_access.truncate(0);
+        self.cpu_local_page_prot_access.truncate(0);
+        self.syscall_events.truncate(0);
+        self.global_interaction_events.truncate(0);
+        self.instruction_fetch_events.truncate(0);
+        self.instruction_decode_events.truncate(0);
+        let mut cumulative_sum = self.global_cumulative_sum.lock().unwrap();
+        *cumulative_sum = SepticDigest::default();
+        self.global_interaction_event_count = 0;
+        self.bump_memory_events.truncate(0);
+        self.bump_state_events.truncate(0);
+        let _ = self.public_values.reset();
+        self.next_nonce = 0;
+        self.shape = None;
+        self.estimated_trace_area = 0;
+        self.initial_timestamp = 0;
+        self.last_timestamp = 0;
+        self.pc_start = None;
+        self.next_pc = 0;
+        self.exit_code = 0;
     }
 }
 

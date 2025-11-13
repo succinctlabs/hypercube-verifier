@@ -160,13 +160,14 @@ impl<F: PrimeField32> MachineExecutor<F> {
                         let permit = permitting.acquire(2 * 1024 * 1024 * 1024).await.unwrap();
 
                         let program = program.clone();
+                        let record = ExecutionRecord::new(program.clone(), context.proof_nonce);
                         let (done, mut record, registers) = tokio::task::spawn_blocking({
                             let program = program.clone();
                             let opts = opts.clone();
                             move || {
                                 let _debug_span =
                                     tracing::trace_span!("tracing chunk blocking task").entered();
-                                trace_chunk::<F>(program, opts, chunk, context.proof_nonce)
+                                trace_chunk::<F>(program, opts, chunk, context.proof_nonce, record)
                             }
                         })
                         .await
@@ -352,7 +353,7 @@ fn generate_chunks(
     loop {
         tracing::debug!("starting new shard at clk: {} at pc: {}", vm.core.clk(), vm.core.pc());
         match vm.execute().expect("todo: handle result") {
-            CycleResult::ShardBoundry => {
+            CycleResult::ShardBoundary => {
                 // Note: Chunk implentations should always be cheap to clone.
                 if let Some(spliced) = vm.splice(chunk.clone()) {
                     tracing::trace!("shard ended at clk: {}", vm.core.clk());
@@ -418,14 +419,15 @@ pub fn trace_chunk<F: PrimeField32>(
     opts: SP1CoreOpts,
     chunk: impl MinimalTrace,
     proof_nonce: [u32; PROOF_NONCE_NUM_WORDS],
+    mut record: ExecutionRecord,
 ) -> Result<(bool, ExecutionRecord, [MemoryRecord; 32]), ExecutionError> {
-    let mut vm = TracingVM::new(&chunk, program, opts, proof_nonce);
+    let mut vm = TracingVM::new(&chunk, program, opts, proof_nonce, &mut record);
     let status = vm.execute()?;
     tracing::trace!("chunk ended at clk: {}", vm.core.clk());
     tracing::trace!("chunk ended at pc: {}", vm.core.pc());
 
-    let mut record = std::mem::take(&mut vm.record);
-    let pv = record.public_values;
+    // let mut record = std::mem::take(&mut record);
+    let pv = vm.public_values();
 
     // Handle the case where `COMMIT` or `COMMIT_DEFERRED_PROOFS` happens across last two shards.
     //
@@ -437,13 +439,13 @@ pub fn trace_chunk<F: PrimeField32>(
         loop {
             // Execute until we get a done status.
             if vm.execute()?.is_done() {
-                let pv = vm.record.public_values;
+                let pv = *vm.public_values();
 
                 // Update the record.
-                record.public_values.commit_syscall = 1;
-                record.public_values.commit_deferred_syscall = 1;
-                record.public_values.committed_value_digest = pv.committed_value_digest;
-                record.public_values.deferred_proofs_digest = pv.deferred_proofs_digest;
+                vm.record.public_values.commit_syscall = 1;
+                vm.record.public_values.commit_deferred_syscall = 1;
+                vm.record.public_values.committed_value_digest = pv.committed_value_digest;
+                vm.record.public_values.deferred_proofs_digest = pv.deferred_proofs_digest;
 
                 break;
             }
@@ -451,9 +453,11 @@ pub fn trace_chunk<F: PrimeField32>(
     }
 
     // Finalize the public values
-    record.finalize_public_values::<F>(true);
+    vm.record.finalize_public_values::<F>(true);
 
-    Ok((status.is_done(), record, *vm.core.registers()))
+    let registers = *vm.core.registers();
+    drop(vm);
+    Ok((status.is_done(), record, registers))
 }
 
 #[tracing::instrument(name = "defer", skip_all)]

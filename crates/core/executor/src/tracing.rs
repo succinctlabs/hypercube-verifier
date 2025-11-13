@@ -4,7 +4,7 @@ use std::{
 };
 
 use hashbrown::HashMap;
-use sp1_hypercube::air::PROOF_NONCE_NUM_WORDS;
+use sp1_hypercube::air::{PublicValues, PROOF_NONCE_NUM_WORDS};
 use sp1_jit::MinimalTrace;
 
 use crate::{
@@ -35,7 +35,7 @@ pub struct TracingVM<'a> {
     /// The local memory access for any deferred precompiles.
     pub precompile_local_memory_access: Option<LocalMemoryAccess>,
     /// The execution record were populating.
-    pub record: ExecutionRecord,
+    pub record: &'a mut ExecutionRecord,
 }
 
 impl TracingVM<'_> {
@@ -52,13 +52,13 @@ impl TracingVM<'_> {
                 CycleResult::TraceEnd => {
                     self.register_refresh();
                     self.postprocess();
-                    return Ok(CycleResult::ShardBoundry);
+                    return Ok(CycleResult::ShardBoundary);
                 }
                 CycleResult::Done(true) => {
                     self.postprocess();
                     return Ok(CycleResult::Done(true));
                 }
-                CycleResult::ShardBoundry => {
+                CycleResult::ShardBoundary => {
                     unreachable!("Shard boundary should never be returned for tracing VM")
                 }
             }
@@ -186,8 +186,8 @@ impl<'a> TracingVM<'a> {
         program: Arc<Program>,
         opts: SP1CoreOpts,
         proof_nonce: [u32; PROOF_NONCE_NUM_WORDS],
+        record: &'a mut ExecutionRecord,
     ) -> Self {
-        let mut record = ExecutionRecord::new(program.clone(), proof_nonce);
         record.initial_timestamp = trace.clk_start();
 
         Self {
@@ -196,6 +196,12 @@ impl<'a> TracingVM<'a> {
             local_memory_access: LocalMemoryAccess::default(),
             precompile_local_memory_access: None,
         }
+    }
+
+    /// Get the public values from the record.
+    #[must_use]
+    pub fn public_values(&self) -> &PublicValues<u32, u64, u64, u32> {
+        &self.record.public_values
     }
 
     /// Execute a load instruction.
@@ -799,7 +805,7 @@ impl<'a> SyscallRuntime<'a> for TracingVM<'a> {
     }
 
     fn record_mut(&mut self) -> &mut ExecutionRecord {
-        &mut self.record
+        self.record
     }
 
     fn rr(&mut self, register: usize) -> MemoryReadRecord {

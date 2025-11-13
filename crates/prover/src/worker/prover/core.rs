@@ -244,11 +244,18 @@ where
                                 chunk.clk_start,
                                 chunk.clk_end
                             );
+                            let record = tracing::info_span!("allocating record").in_scope(|| {
+                                ExecutionRecord::new_preallocated(
+                                    program.clone(),
+                                    common_input.nonce,
+                                )
+                            });
                             let (_, mut record, _) = trace_chunk::<SP1Field>(
                                 program.clone(),
                                 opts.clone(),
                                 chunk,
                                 common_input.nonce,
+                                record,
                             )
                             .map_err(|e| {
                                 TaskError::Fatal(anyhow::anyhow!("failed to trace chunk: {}", e))

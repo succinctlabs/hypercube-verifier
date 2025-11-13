@@ -40,7 +40,7 @@ impl GasEstimatingVM<'_> {
         loop {
             match self.execute_instruction()? {
                 CycleResult::Done(false) => {}
-                CycleResult::TraceEnd | CycleResult::ShardBoundry | CycleResult::Done(true) => {
+                CycleResult::TraceEnd | CycleResult::ShardBoundary | CycleResult::Done(true) => {
                     return Ok(self.gas_calculator.generate_report());
                 }
             }
