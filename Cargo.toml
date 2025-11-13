@@ -90,44 +90,44 @@ cslpc-experimental = { path = "crates/prover-clean/experimental" }
 cslpc-basefold = { path = "crates/prover-clean/basefold" }
 
 # slop 
-slop-air = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-koala-bear = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-bn254 = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-basefold = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-basefold-prover = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-dft = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-matrix = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-algebra = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-symmetric = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-merkle-tree = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-poseidon2 = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-commit = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-challenger = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-multilinear = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-tensor = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-sumcheck = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-alloc = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-futures = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-stacked = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-slop-jagged = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
+slop-air = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-koala-bear = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-bn254 = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-basefold = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-basefold-prover = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-dft = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-matrix = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-algebra = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-symmetric = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-merkle-tree = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-poseidon2 = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-commit = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-challenger = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-multilinear = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-tensor = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-sumcheck = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-alloc = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-futures = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-stacked = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+slop-jagged = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
 
 # SP1
-sp1-core-machine = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-core-executor = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-hypercube = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-primitives = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-prover = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-recursion-circuit = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-recursion-compiler = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-recursion-machine = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-recursion-executor = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-curves = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-cuda = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-derive = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
-sp1-sdk = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6", features = [
+sp1-core-machine = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-core-executor = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-hypercube = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-primitives = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-prover = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-recursion-circuit = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-recursion-compiler = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-recursion-machine = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-recursion-executor = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-curves = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-cuda = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-derive = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
+sp1-sdk = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record", features = [
     "experimental",
 ] }
-sp1-prover-types = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "multilinear_v6" }
+sp1-prover-types = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/preallocated-record" }
 
 # # slop local copy
 # slop-air = { path = "../sp1-wip/slop/crates/air" }
