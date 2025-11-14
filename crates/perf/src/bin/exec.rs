@@ -91,6 +91,7 @@ async fn main() {
     let task_context = TaskContext { proof_id, parent_id, parent_context, requester_id };
     let executor = SP1CoreExecutor::new(
         splicing_engine,
+        2,
         elf_artifact,
         stdin,
         common_input,
@@ -100,6 +101,7 @@ async fn main() {
         sender,
         artifact_client,
         worker_client,
+        None,
     );
 
     let counter_handle = tokio::task::spawn(async move {
