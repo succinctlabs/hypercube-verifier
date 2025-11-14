@@ -131,8 +131,6 @@ where
             None => [0u32; PROOF_NONCE_NUM_WORDS],
         };
 
-        tracing::info!("downloaded stdin");
-
         let vkey_download_handle = tokio::spawn({
             let artifact_client_clone = self.artifact_client.clone();
             let worker_client_clone = self.worker_client.clone();
@@ -170,7 +168,7 @@ where
                     if status != TaskStatus::Succeeded {
                         return Err(TaskError::Fatal(anyhow::anyhow!("setup task failed")));
                     }
-                    tracing::info!("setup task succeeded");
+                    tracing::debug!("setup task succeeded");
                     let vk =
                         artifact_client_clone.download::<SP1VerifyingKey>(&vk_artifact).await?;
                     setup_cache.lock().await.put(elf_clone, vk.clone());
