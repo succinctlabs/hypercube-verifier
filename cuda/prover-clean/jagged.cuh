@@ -194,7 +194,7 @@ struct JaggedMle {
                 end_c = sh_start[lo + 1];
                 zc = sh_zcol[lo];
             } else {
-                uint32_t c = upper_bound_u32(this->startIndices, num_cols + 1, i) - 1;
+                c = upper_bound_u32(this->startIndices, num_cols + 1, i) - 1;
                 start_c = this->startIndices[c];
                 end_c = this->startIndices[c + 1];
                 zc = col_coefficient[c];

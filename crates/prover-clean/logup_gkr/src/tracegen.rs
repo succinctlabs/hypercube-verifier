@@ -8,7 +8,6 @@ use csl_cuda::{
     args, sys::prover_clean::prover_clean_logup_gkr_populate_last_circuit_layer, TaskScope,
     ToDevice,
 };
-use futures::{stream::FuturesUnordered, StreamExt};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use slop_alloc::Buffer;
 use slop_multilinear::{Mle, Point};
@@ -74,7 +73,6 @@ pub async fn generate_first_layer<'a>(
 
     // Generate traces per chip, sorted by chip name.
     let mut interaction_offset = 0;
-    let mut handles = FuturesUnordered::new();
     for (name, interactions) in
         input_data.all_interactions.iter().filter(|(name, _)| input_data.chip_set.contains(*name))
     {
@@ -87,63 +85,56 @@ pub async fn generate_first_layer<'a>(
         let mut denominator = unsafe { denominator.owned_unchecked() };
         let betas = unsafe { betas.owned_unchecked() };
         let real_height = input_data.main_poly_height(name).unwrap();
-        let outer_span = tracing::Span::current();
 
-        let handle = backend.run_in_place(move |scope| async move {
-            const BLOCK_SIZE: usize = 256;
-            const ROW_STRIDE: usize = 8;
-            const INTERACTION_STRIDE: usize = 4;
-            // To fit the padding requirement, each trace must have even height.
-            assert_eq!(real_height % 2, 0);
-            let is_padding = real_height == 0;
+        const BLOCK_SIZE: usize = 256;
+        const ROW_STRIDE: usize = 8;
+        const INTERACTION_STRIDE: usize = 4;
+        // To fit the padding requirement, each trace must have even height.
+        assert_eq!(real_height % 2, 0);
+        let is_padding = real_height == 0;
 
-            // half_height is max(1, ceil(real_height / 2))
-            let matrix_height = std::cmp::max(real_height, 2);
-            let half_height = matrix_height.div_ceil(2);
+        // half_height is max(1, ceil(real_height / 2))
+        let matrix_height = std::cmp::max(real_height, 2);
+        let half_height = matrix_height.div_ceil(2);
 
+        let block_dim = BLOCK_SIZE;
+        let grid_size = (
+            half_height.div_ceil(BLOCK_SIZE * ROW_STRIDE),
+            num_interactions.div_ceil(INTERACTION_STRIDE),
+            1,
+        );
+        unsafe {
+            let preprocessed_ptr = input_data.preprocessed_ptr(name);
+            let main_ptr = input_data.main_ptr(name);
 
-            let block_dim = BLOCK_SIZE;
-            let grid_size = (
-                half_height.div_ceil(BLOCK_SIZE * ROW_STRIDE),
-                num_interactions.div_ceil(INTERACTION_STRIDE),
-                1,
+            let args = args!(
+                interactions.as_raw(),
+                interaction_start_indices.as_ptr(),
+                interaction_data.as_mut_ptr(),
+                numerator.as_mut_ptr(),
+                denominator.as_mut_ptr(),
+                preprocessed_ptr,
+                main_ptr,
+                alpha,
+                betas.guts().as_ptr(),
+                interaction_offset,
+                real_height,
+                height,
+                is_padding
             );
-            unsafe {
-                let preprocessed_ptr = input_data.preprocessed_ptr(name);
-                let main_ptr = input_data.main_ptr(name);
-
-                let args = args!(
-                    interactions.as_raw(),
-                    interaction_start_indices.as_ptr(),
-                    interaction_data.as_mut_ptr(),
-                    numerator.as_mut_ptr(),
-                    denominator.as_mut_ptr(),
-                    preprocessed_ptr,
-                    main_ptr,
-                    alpha,
-                    betas.guts().as_ptr(),
-                    interaction_offset,
-                    real_height,
-                    height,
-                    is_padding
-                );
-                scope
-                    .launch_kernel(
-                        prover_clean_logup_gkr_populate_last_circuit_layer(),
-                        grid_size,
-                        block_dim,
-                        &args,
-                        0,
-                    )
-                    .unwrap();
-            }
-        }.instrument(tracing::trace_span!(parent: &outer_span, "populate last circuit layer", name = %name)));
-        handles.push(handle);
+            backend
+                .launch_kernel(
+                    prover_clean_logup_gkr_populate_last_circuit_layer(),
+                    grid_size,
+                    block_dim,
+                    &args,
+                    0,
+                )
+                .unwrap();
+        }
 
         interaction_offset += num_interactions;
     }
-
-    while (handles.next().await).is_some() {}
 
     unsafe {
         interaction_data.assume_init();

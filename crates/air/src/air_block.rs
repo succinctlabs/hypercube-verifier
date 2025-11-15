@@ -11,8 +11,7 @@ use sp1_core_executor::syscalls::SyscallCode;
 use sp1_core_executor::ByteOpcode;
 use sp1_core_machine::air::{MemoryAirBuilder, SP1CoreAirBuilder, WordAirBuilder};
 use sp1_core_machine::operations::{
-    AddrAddOperation, AddressSlicePageProtOperation, GlobalAccumulationOperation,
-    SyscallAddrOperation,
+    AddrAddOperation, GlobalAccumulationOperation, SyscallAddrOperation,
 };
 use sp1_core_machine::riscv::{WeierstrassAddAssignChip, WeierstrassDoubleAssignChip};
 use sp1_core_machine::syscall::precompiles::weierstrass::{
@@ -41,7 +40,6 @@ use sp1_hypercube::{
     air::{AirInteraction, InteractionScope, MachineAir, MessageBuilder},
     InteractionKind,
 };
-use sp1_primitives::consts::{PROT_READ, PROT_WRITE};
 use sp1_primitives::polynomial::Polynomial;
 use sp1_primitives::SP1Field;
 use sp1_recursion_machine::builder::RecursionAirBuilder;
@@ -696,30 +694,6 @@ where
                     local.is_real,
                     InteractionScope::Local,
                 );
-
-                AddressSlicePageProtOperation::<F>::eval(
-                    builder,
-                    local.clk_high.into(),
-                    local.clk_low.into(),
-                    &local.q_ptr.addr.map(Into::into),
-                    &local.q_addrs[local.q_addrs.len() - 1].value.map(Into::into),
-                    SymbolicExprF::from_canonical_u8(PROT_READ),
-                    &local.read_slice_page_prot_access,
-                    local.is_real.into(),
-                );
-
-                let clk_low: SymbolicExprF = local.clk_low.into();
-
-                AddressSlicePageProtOperation::<F>::eval(
-                    builder,
-                    local.clk_high.into(),
-                    clk_low + SymbolicExprF::one(),
-                    &local.p_ptr.addr.map(Into::into),
-                    &local.p_addrs[local.p_addrs.len() - 1].value.map(Into::into),
-                    SymbolicExprF::from_canonical_u8(PROT_READ | PROT_WRITE),
-                    &local.write_slice_page_prot_access,
-                    local.is_real.into(),
-                );
             }
 
             _ => unreachable!(),
@@ -912,17 +886,6 @@ where
                     [SymbolicExprF::zero(), SymbolicExprF::zero(), SymbolicExprF::zero()],
                     local.is_real,
                     InteractionScope::Local,
-                );
-
-                AddressSlicePageProtOperation::<F>::eval(
-                    builder,
-                    local.clk_high.into(),
-                    local.clk_low.into(),
-                    &local.p_ptr.addr.map(Into::into),
-                    &local.p_addrs[local.p_addrs.len() - 1].value.map(Into::into),
-                    SymbolicExprF::from_canonical_u8(PROT_READ | PROT_WRITE),
-                    &local.write_slice_page_prot_access,
-                    local.is_real.into(),
                 );
             }
 

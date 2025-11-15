@@ -1,9 +1,5 @@
-use std::borrow::Cow;
-use std::collections::{BTreeMap, BTreeSet};
-use std::sync::RwLock;
-
 use csl_air::instruction::Instruction16;
-use csl_air::{air_block::BlockAir, codegen_cuda_eval, SymbolicProverFolder};
+use csl_air::{air_block::BlockAir, SymbolicProverFolder};
 use csl_cuda::sys::prover_clean::{
     jagged_constraint_poly_eval_1024_koala_bear_extension_kernel,
     jagged_constraint_poly_eval_1024_koala_bear_kernel,
@@ -45,6 +41,8 @@ use sp1_hypercube::{
     AirOpenedValues, Chip, ChipEvaluation, ChipOpenedValues, ConstraintSumcheckFolder,
     LogUpEvaluations, ShardOpenedValues,
 };
+use std::borrow::Cow;
+use std::collections::{BTreeMap, BTreeSet};
 
 pub mod data;
 pub mod primitives;
@@ -60,29 +58,8 @@ pub struct EvalProgramInfo<B: Backend = CpuBackend> {
     pub ef_constants_indices: Buffer<u32, B>,
 }
 
-type CudaEvalResult =
+pub type CudaEvalResult =
     (Vec<u32>, Vec<Instruction16>, Vec<u32>, Vec<Felt>, Vec<u32>, Vec<Ext>, Vec<u32>, u32, u32);
-
-static CUDA_EVAL_CACHE: RwLock<BTreeMap<String, CudaEvalResult>> = RwLock::new(BTreeMap::new());
-
-pub fn initialize_cuda_cache<A>(airs: &BTreeSet<Chip<Felt, A>>)
-where
-    A: for<'a> BlockAir<SymbolicProverFolder<'a>>,
-{
-    let mut cache = BTreeMap::new();
-    for chip in airs {
-        let result = codegen_cuda_eval(chip.air.as_ref());
-        cache.insert(chip.air.name(), result);
-    }
-
-    let mut guard = CUDA_EVAL_CACHE.write().unwrap();
-    *guard = cache;
-}
-
-pub fn get_cuda_eval_result(chip_name: &String) -> Option<CudaEvalResult> {
-    let guard = CUDA_EVAL_CACHE.read().unwrap();
-    guard.get(chip_name).cloned()
-}
 
 pub struct ZeroCheckJaggedPoly<'a, K: Field> {
     /// The program for **all chips**.
@@ -121,7 +98,10 @@ pub struct ZeroCheckJaggedPoly<'a, K: Field> {
     pub total_len: usize,
 }
 
-pub fn initialize_program_cpu<A>(chips: &BTreeSet<Chip<Felt, A>>) -> EvalProgramInfo
+pub fn initialize_program_cpu<A>(
+    chips: &BTreeSet<Chip<Felt, A>>,
+    zerocheck_programs: &BTreeMap<String, CudaEvalResult>,
+) -> EvalProgramInfo
 where
     A: for<'a> BlockAir<SymbolicProverFolder<'a>>,
 {
@@ -149,7 +129,7 @@ where
             chip_ef_constants_indices,
             chip_f_ctr,
             chip_ef_ctr,
-        ) = get_cuda_eval_result(&chip.air.name()).unwrap_or_else(|| {
+        ) = zerocheck_programs.get(&chip.air.name()).unwrap_or_else(|| {
             panic!("Chip name {} not found in CUDA eval cache", chip.air.name());
         });
 
@@ -176,8 +156,8 @@ where
             ef_constants_indices.push(current_ef_constants_len + idx);
         }
 
-        f_ctr = f_ctr.max(chip_f_ctr);
-        ef_ctr = ef_ctr.max(chip_ef_ctr);
+        f_ctr = f_ctr.max(*chip_f_ctr);
+        ef_ctr = ef_ctr.max(*chip_ef_ctr);
     }
     operations_indices.push(operations.len() as u32);
 
@@ -195,12 +175,13 @@ where
 
 pub async fn initialize_program<A>(
     chips: &BTreeSet<Chip<Felt, A>>,
+    zerocheck_programs: &BTreeMap<String, CudaEvalResult>,
     scope: &TaskScope,
 ) -> EvalProgramInfo<TaskScope>
 where
     A: for<'a> BlockAir<SymbolicProverFolder<'a>>,
 {
-    let cpu_info = initialize_program_cpu(chips);
+    let cpu_info = initialize_program_cpu(chips, zerocheck_programs);
 
     let (
         constraint_indices_device,
@@ -298,6 +279,7 @@ where
 pub async fn initialize_zerocheck_poly<'b, A>(
     data: &'b JaggedTraceMle<Felt, TaskScope>,
     chips: &BTreeSet<Chip<Felt, A>>,
+    zerocheck_programs: &BTreeMap<String, CudaEvalResult>,
     initial_heights: Vec<u32>,
     public_values: Vec<Felt>,
     powers_of_alpha: Vec<Ext>,
@@ -311,7 +293,7 @@ where
     A: for<'a> BlockAir<SymbolicProverFolder<'a>>,
 {
     let scope = data.dense().backend();
-    let program = initialize_program(chips, scope).await;
+    let program = initialize_program(chips, zerocheck_programs, scope).await;
     let mut virtual_geq: Vec<VirtualGeq<Ext>> = vec![];
     let mut info_input_heights = vec![];
 
@@ -565,6 +547,7 @@ where
 #[allow(clippy::too_many_arguments)]
 pub async fn zerocheck<A, C>(
     chips: &BTreeSet<Chip<Felt, A>>,
+    zerocheck_programs: &BTreeMap<String, CudaEvalResult>,
     trace_mle: &JaggedTraceMle<Felt, TaskScope>,
     batching_challenge: Ext,
     gkr_opening_batch_randomness: Ext,
@@ -584,8 +567,6 @@ where
         .values()
         .map(|trace_offset| trace_offset.poly_size as u32)
         .collect::<Vec<u32>>();
-
-    initialize_cuda_cache(chips);
 
     let max_num_constraints =
         itertools::max(chips.iter().map(|chip| chip.num_constraints)).unwrap();
@@ -656,6 +637,7 @@ where
     let main_poly = initialize_zerocheck_poly(
         trace_mle,
         chips,
+        zerocheck_programs,
         initial_heights.clone(),
         public_values,
         powers_of_challenge,
@@ -694,49 +676,6 @@ where
         }
     }
 
-    // // *************** DEBUG ******************
-
-    // let chip_evaluations = round_batch_evaluations(&jagged_point, trace_mle).await;
-    // let [preprocessed, main] = chip_evaluations.rounds.try_into().unwrap();
-
-    // let mut opened_values = BTreeMap::new();
-
-    // println!("Num chips: {}", chips.len());
-    // println!("Num main evals: {}", main.len());
-    // println!("Num prep evals: {}", preprocessed.len());
-
-    // let mut preprocessed_so_far = 0;
-
-    // for (i, (chip, main_evals)) in chips.iter().zip_eq(main.iter()).enumerate() {
-    //     let openings = ChipOpenedValues {
-    //         main: AirOpenedValues { local: main_evals.to_host().await.unwrap().to_vec() },
-    //         preprocessed: AirOpenedValues {
-    //             local: if chip.preprocessed_width() != 0 {
-    //                 let res = preprocessed[preprocessed_so_far].to_host().await.unwrap().to_vec();
-    //                 preprocessed_so_far += 1;
-    //                 res
-    //             } else {
-    //                 vec![]
-    //             },
-    //         },
-    //         degree: Point::<Ext>::from_usize(initial_heights[i] as usize, max_log_row_count + 1),
-    //         local_cumulative_sum: Ext::zero(),
-    //     };
-
-    //     // Observe the openings
-    //     for eval in openings.preprocessed.local.iter() {
-    //         challenger.observe_ext_element(*eval);
-    //     }
-
-    //     for eval in openings.main.local.iter() {
-    //         challenger.observe_ext_element(*eval);
-    //     }
-
-    //     opened_values.insert(chip.name(), openings);
-    // }
-
-    // println!("debug opened values: {:?}", opened_values);
-
     let mut preprocessed_ptr = 0;
     let mut main_ptr = total_preprocessed_columns;
     let mut opened_values: BTreeMap<String, ChipOpenedValues<Felt, Ext>> = BTreeMap::new();
@@ -765,7 +704,6 @@ where
             ChipOpenedValues {
                 preprocessed,
                 main,
-                local_cumulative_sum: Ext::zero(),
                 degree: Point::from_usize(
                     initial_heights[i] as usize,
                     (max_log_row_count + 1) as usize,
@@ -808,6 +746,7 @@ pub mod tests {
     };
     use std::mem::MaybeUninit;
 
+    use csl_air::codegen_cuda_eval;
     use std::collections::{BTreeMap, BTreeSet};
     use std::marker::PhantomData;
     use std::ops::Deref;
@@ -820,9 +759,7 @@ pub mod tests {
     };
     use cslpc_utils::{Ext, Felt, JaggedTraceMle, TestGC, TraceDenseData, TraceOffset};
 
-    use super::initialize_cuda_cache;
     use super::primitives::evaluate_jagged_columns;
-    use super::CUDA_EVAL_CACHE;
     use super::{
         challenger_update, evaluate_zerocheck, initialize_zerocheck_poly, zerocheck,
         zerocheck_fix_last_variable,
@@ -835,11 +772,6 @@ pub mod tests {
     };
     use sp1_core_executor::{ExecutionRecord, Program};
     use sp1_derive::AlignedBorrow;
-
-    pub fn clear_cuda_cache() {
-        let mut guard = CUDA_EVAL_CACHE.write().unwrap();
-        guard.clear();
-    }
 
     pub enum ZerocheckTestChip {
         Chip1(ZerocheckTestChip1),
@@ -1798,8 +1730,12 @@ pub mod tests {
         chips.insert(Chip::new(ZerocheckTestChip::Chip1(ZerocheckTestChip1)));
         chips.insert(Chip::new(ZerocheckTestChip::Chip2(ZerocheckTestChip2)));
         chips.insert(Chip::new(ZerocheckTestChip::Chip3(ZerocheckTestChip3)));
-        clear_cuda_cache();
-        initialize_cuda_cache(&chips);
+
+        let mut cache = BTreeMap::new();
+        for chip in chips.iter() {
+            let result = codegen_cuda_eval(chip.air.as_ref());
+            cache.insert(chip.name(), result);
+        }
 
         let chips_vec = chips.iter().cloned().collect::<Vec<_>>();
         let num_chips = chips_vec.len();
@@ -1884,6 +1820,7 @@ pub mod tests {
             let main_poly = initialize_zerocheck_poly(
                 trace_mle.as_ref(),
                 &chips,
+                &cache,
                 initial_heights.clone(),
                 public_values.clone(),
                 powers_of_alpha.clone(),
@@ -1982,8 +1919,12 @@ pub mod tests {
         chips.insert(Chip::new(ZerocheckTestChip::Chip1(ZerocheckTestChip1)));
         chips.insert(Chip::new(ZerocheckTestChip::Chip2(ZerocheckTestChip2)));
         chips.insert(Chip::new(ZerocheckTestChip::Chip3(ZerocheckTestChip3)));
-        clear_cuda_cache();
-        initialize_cuda_cache(&chips);
+
+        let mut cache = BTreeMap::new();
+        for chip in chips.iter() {
+            let result = codegen_cuda_eval(chip.air.as_ref());
+            cache.insert(chip.name(), result);
+        }
         let chips_vec = chips.iter().cloned().collect::<Vec<_>>();
         let row_variables = 22;
         run_in_place(|t| async move {
@@ -2048,6 +1989,7 @@ pub mod tests {
 
             let (opened_values, zerocheck_proof) = zerocheck(
                 &chips,
+                &cache,
                 trace_mle.as_ref(),
                 batching_challenge,
                 gkr_opening_batch_randomness,
@@ -2099,8 +2041,11 @@ pub mod tests {
             )
             .await;
             let chips = machine.smallest_cluster(&chips).unwrap();
-            clear_cuda_cache();
-            initialize_cuda_cache(chips);
+            let mut cache = BTreeMap::new();
+            for chip in chips.iter() {
+                let result = codegen_cuda_eval(chip.air.as_ref());
+                cache.insert(chip.name(), result);
+            }
 
             let trace_mle = Arc::new(trace_mle);
 
@@ -2152,6 +2097,7 @@ pub mod tests {
 
             let (opened_values, zerocheck_proof) = zerocheck(
                 chips,
+                &cache,
                 trace_mle.as_ref(),
                 batching_challenge,
                 gkr_opening_batch_randomness,

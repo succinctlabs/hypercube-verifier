@@ -1,6 +1,4 @@
-use std::{collections::BTreeMap, marker::PhantomData, mem::MaybeUninit, sync::Arc};
-
-use csl_air::{air_block::BlockAir, SymbolicProverFolder};
+use csl_air::{air_block::BlockAir, codegen_cuda_eval, SymbolicProverFolder};
 use csl_cuda::{TaskScope, ToDevice};
 use csl_jagged::{
     Poseidon2Bn254JaggedCudaProverComponents, Poseidon2KoalaBearJaggedCudaProverComponents,
@@ -31,6 +29,7 @@ use sp1_hypercube::{
 };
 use sp1_primitives::{SP1GlobalContext, SP1OuterGlobalContext};
 use sp1_prover::{components::SP1ProverComponents, CompressAir, WrapAir};
+use std::{collections::BTreeMap, marker::PhantomData, mem::MaybeUninit, sync::Arc};
 
 pub struct CudaSP1ProverComponents;
 
@@ -194,6 +193,12 @@ where
 
     let machine = verifier.machine().clone();
 
+    let mut cache = BTreeMap::new();
+    for chip in machine.chips() {
+        let result = codegen_cuda_eval(chip.air.as_ref());
+        cache.insert(chip.air.name(), result);
+    }
+
     let log_stacking_height = verifier.log_stacking_height();
     let max_log_row_count = verifier.max_log_row_count();
 
@@ -241,6 +246,7 @@ where
     CudaShardProver {
         trace_buffers: Arc::new(WorkerQueue::new(trace_buffers)),
         all_interactions,
+        all_zerocheck_programs: cache,
         max_log_row_count: max_log_row_count as u32,
         basefold_prover,
         max_trace_size,

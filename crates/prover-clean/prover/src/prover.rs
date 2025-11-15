@@ -1,3 +1,4 @@
+use crate::{MainTraceData, ShardData};
 use csl_air::air_block::BlockAir;
 use csl_air::SymbolicProverFolder;
 use csl_basefold::{BasefoldCudaProverComponents, DeviceGrindingChallenger};
@@ -11,6 +12,7 @@ use cslpc_merkle_tree::{SingleLayerMerkleTreeProverError, TcsProverClean};
 use cslpc_tracegen::{full_tracegen_permit, main_tracegen_permit, CudaShardProverData};
 use cslpc_utils::{Ext, Felt, JaggedTraceMle};
 use cslpc_zerocheck::zerocheck;
+use cslpc_zerocheck::CudaEvalResult;
 use slop_algebra::AbstractField;
 use slop_alloc::{Buffer, CanCopyFromRef, HasBackend, ToHost};
 use slop_basefold::BasefoldProof;
@@ -29,7 +31,7 @@ use sp1_hypercube::{
     prover::{AirProver, PreprocessedData, ProverPermit, ProverSemaphore, ProvingKey},
     Machine, MachineVerifyingKey, ShardProof,
 };
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::iter::once;
 use std::mem::MaybeUninit;
 use std::pin::Pin;
@@ -37,8 +39,6 @@ use std::{marker::PhantomData, sync::Arc};
 use thiserror::Error;
 use tokio::sync::Mutex;
 use tracing::Instrument;
-
-use crate::{MainTraceData, ShardData};
 
 pub trait ProverCleanProverComponents<GC: IopCtx>: Send + Sync + 'static {
     type P: TcsProverClean<GC>;
@@ -58,6 +58,7 @@ pub struct CudaShardProver<GC: IopCtx, PC: ProverCleanProverComponents<GC>> {
     pub max_trace_size: usize,
     pub backend: TaskScope,
     pub all_interactions: BTreeMap<String, Arc<Interactions<GC::F, TaskScope>>>,
+    pub all_zerocheck_programs: BTreeMap<String, CudaEvalResult>,
     pub _marker: PhantomData<GC>,
 }
 
@@ -618,6 +619,7 @@ impl<GC: IopCtx<F = Felt, EF = Ext>, PC: ProverCleanProverComponents<GC>> CudaSh
         // Generate the zerocheck proof.
         let (shard_open_values, zerocheck_partial_sumcheck_proof) = zerocheck(
             shard_chips,
+            &self.all_zerocheck_programs,
             traces,
             batching_challenge,
             gkr_opening_batch_challenge,
@@ -674,8 +676,6 @@ impl<GC: IopCtx<F = Felt, EF = Ext>, PC: ProverCleanProverComponents<GC>> CudaSh
             .await
             .unwrap();
 
-        let shard_chips = shard_chips.iter().map(MachineAir::name).collect::<BTreeSet<_>>();
-
         let proof = ShardProof {
             main_commitment: main_commit,
             opened_values: shard_open_values,
@@ -683,7 +683,6 @@ impl<GC: IopCtx<F = Felt, EF = Ext>, PC: ProverCleanProverComponents<GC>> CudaSh
             evaluation_proof,
             zerocheck_proof: zerocheck_partial_sumcheck_proof,
             public_values,
-            shard_chips,
         };
 
         (proof, permit)
@@ -693,6 +692,7 @@ impl<GC: IopCtx<F = Felt, EF = Ext>, PC: ProverCleanProverComponents<GC>> CudaSh
 #[cfg(test)]
 mod tests {
     use super::*;
+    use csl_air::codegen_cuda_eval;
     use csl_cuda::run_in_place;
     use cslpc_merkle_tree::Poseidon2KoalaBear16CudaProver;
     use cslpc_tracegen::test_utils::tracegen_setup::{
@@ -763,6 +763,12 @@ mod tests {
                 all_interactions.insert(chip.name().to_string(), Arc::new(device_interactions));
             }
 
+            let mut cache = BTreeMap::new();
+            for chip in machine.chips().iter() {
+                let result = codegen_cuda_eval(chip.air.as_ref());
+                cache.insert(chip.name(), result);
+            }
+
             let num_workers = 1;
             let mut trace_buffers = Vec::with_capacity(num_workers);
             for _ in 0..num_workers {
@@ -778,6 +784,7 @@ mod tests {
                 CudaShardProver {
                     trace_buffers: Arc::new(WorkerQueue::new(trace_buffers)),
                     all_interactions,
+                    all_zerocheck_programs: cache,
                     max_log_row_count: CORE_MAX_LOG_ROW_COUNT,
                     basefold_prover,
                     max_trace_size: CORE_MAX_TRACE_SIZE as usize,

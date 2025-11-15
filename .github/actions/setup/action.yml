@@ -110,6 +110,8 @@ runs:
 
     - name: Set up Docker
       uses: crazy-max/ghaction-setup-docker@v3
+      with: 
+        version: 28.5.2
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
