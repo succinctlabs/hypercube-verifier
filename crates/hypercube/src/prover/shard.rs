@@ -624,7 +624,6 @@ impl<GC: IopCtx, C: ShardProverComponents<GC>> ShardProver<GC, C> {
                     ChipOpenedValues {
                         preprocessed,
                         main,
-                        local_cumulative_sum: GC::EF::zero(),
                         degree: chip_heights[&air.name()].clone(),
                     },
                 )
@@ -787,8 +786,6 @@ impl<GC: IopCtx, C: ShardProverComponents<GC>> ShardProver<GC, C> {
             .await
             .unwrap();
 
-        let shard_chips = shard_chips.iter().map(MachineAir::name).collect::<BTreeSet<_>>();
-
         let proof = ShardProof {
             main_commitment: main_commit,
             opened_values: shard_open_values,
@@ -796,7 +793,6 @@ impl<GC: IopCtx, C: ShardProverComponents<GC>> ShardProver<GC, C> {
             evaluation_proof,
             zerocheck_proof: zerocheck_partial_sumcheck_proof,
             public_values,
-            shard_chips,
         };
 
         (proof, permit)

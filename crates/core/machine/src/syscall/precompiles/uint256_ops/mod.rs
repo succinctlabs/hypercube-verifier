@@ -9,7 +9,6 @@ use sp1_core_executor::{
 };
 use sp1_curves::{params::NumWords, uint256::U256Field};
 use sp1_hypercube::air::MachineAir;
-use sp1_primitives::consts::{PROT_READ, PROT_WRITE};
 use std::{borrow::BorrowMut, mem::MaybeUninit};
 
 pub use air::{Uint256OpsChip, Uint256OpsCols, NUM_UINT256_OPS_COLS};
@@ -17,7 +16,7 @@ use typenum::Unsigned;
 type WordsFieldElement = <U256Field as NumWords>::WordsFieldElement;
 const WORDS_FIELD_ELEMENT: usize = WordsFieldElement::USIZE;
 
-use crate::{operations::AddressSlicePageProtOperation, utils::next_multiple_of_32};
+use crate::utils::next_multiple_of_32;
 
 pub const U256_NUM_WORDS: usize = 4;
 
@@ -196,78 +195,6 @@ impl<F: PrimeField32> MachineAir<F> for Uint256OpsChip {
                             is_add,
                             is_mul,
                         );
-                        if input.public_values.is_untrusted_programs_enabled == 1 {
-                            // Populate page protection operations (once per event, not per word)
-                            cols.address_slice_page_prot_access_a.populate(
-                                &mut new_byte_lookup_events,
-                                event.a_ptr,
-                                event.a_ptr + ((WORDS_FIELD_ELEMENT - 1) * 8) as u64,
-                                event.clk,
-                                PROT_READ,
-                                &event.page_prot_records.read_a_page_prot_records[0],
-                                &event.page_prot_records.read_a_page_prot_records.get(1).copied(),
-                                input.public_values.is_untrusted_programs_enabled,
-                            );
-
-                            // Populate page protection operations (once per event, not per word)
-                            cols.address_slice_page_prot_access_b.populate(
-                                &mut new_byte_lookup_events,
-                                event.b_ptr,
-                                event.b_ptr + ((WORDS_FIELD_ELEMENT - 1) * 8) as u64,
-                                event.clk + 1,
-                                PROT_READ,
-                                &event.page_prot_records.read_b_page_prot_records[0],
-                                &event.page_prot_records.read_b_page_prot_records.get(1).copied(),
-                                input.public_values.is_untrusted_programs_enabled,
-                            );
-
-                            // Populate page protection operations (once per event, not per word)
-                            cols.address_slice_page_prot_access_c.populate(
-                                &mut new_byte_lookup_events,
-                                event.c_ptr,
-                                event.c_ptr + ((WORDS_FIELD_ELEMENT - 1) * 8) as u64,
-                                event.clk + 2,
-                                PROT_READ,
-                                &event.page_prot_records.read_c_page_prot_records[0],
-                                &event.page_prot_records.read_c_page_prot_records.get(1).copied(),
-                                input.public_values.is_untrusted_programs_enabled,
-                            );
-
-                            // Populate page protection operations (once per event, not per word)
-                            cols.address_slice_page_prot_access_d.populate(
-                                &mut new_byte_lookup_events,
-                                event.d_ptr,
-                                event.d_ptr + ((WORDS_FIELD_ELEMENT - 1) * 8) as u64,
-                                event.clk + 3,
-                                PROT_WRITE,
-                                &event.page_prot_records.write_d_page_prot_records[0],
-                                &event.page_prot_records.write_d_page_prot_records.get(1).copied(),
-                                input.public_values.is_untrusted_programs_enabled,
-                            );
-
-                            // Populate page protection operations (once per event, not per word)
-                            cols.address_slice_page_prot_access_e.populate(
-                                &mut new_byte_lookup_events,
-                                event.e_ptr,
-                                event.e_ptr + ((WORDS_FIELD_ELEMENT - 1) * 8) as u64,
-                                event.clk + 4,
-                                PROT_WRITE,
-                                &event.page_prot_records.write_e_page_prot_records[0],
-                                &event.page_prot_records.write_e_page_prot_records.get(1).copied(),
-                                input.public_values.is_untrusted_programs_enabled,
-                            );
-                        } else {
-                            cols.address_slice_page_prot_access_a =
-                                AddressSlicePageProtOperation::default();
-                            cols.address_slice_page_prot_access_b =
-                                AddressSlicePageProtOperation::default();
-                            cols.address_slice_page_prot_access_c =
-                                AddressSlicePageProtOperation::default();
-                            cols.address_slice_page_prot_access_d =
-                                AddressSlicePageProtOperation::default();
-                            cols.address_slice_page_prot_access_e =
-                                AddressSlicePageProtOperation::default();
-                        }
                     }
                 })
             },

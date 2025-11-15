@@ -43,9 +43,6 @@ pub struct SyscallInstrColumns<T> {
     /// Whether the current ecall is a COMMIT.
     pub is_commit: IsZeroOperation<T>,
 
-    /// Whether the current ecall is a PAGE_PROTECT.
-    pub is_page_protect: IsZeroOperation<T>,
-
     /// Whether the current ecall is a COMMIT_DEFERRED_PROOFS.
     pub is_commit_deferred_proofs: IsZeroOperation<T>,
 

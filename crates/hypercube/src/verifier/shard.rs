@@ -3,6 +3,7 @@ use slop_basefold::FriConfig;
 use slop_merkle_tree::MerkleTreeTcs;
 use slop_whir::{Verifier, WhirJaggedConfig, WhirProofShape};
 use std::{
+    cmp::max,
     collections::{BTreeMap, BTreeSet},
     iter::{once, repeat_n},
     marker::PhantomData,
@@ -147,10 +148,10 @@ impl<GC: IopCtx, C: MachineConfig<GC>, A: MachineAir<GC::F>> ShardVerifier<GC, C
             .machine()
             .chips()
             .iter()
-            .filter(|air| proof.shard_chips.contains(&air.name()))
+            .filter(|air| proof.opened_values.chips.keys().contains(&air.name()))
             .cloned()
             .collect::<BTreeSet<_>>();
-        debug_assert_eq!(shard_chips.len(), proof.shard_chips.len());
+        debug_assert_eq!(shard_chips.len(), proof.opened_values.chips.len());
 
         let multiples = C::round_multiples(&proof.evaluation_proof.pcs_proof);
         let preprocessed_multiple = multiples[0];
@@ -448,7 +449,6 @@ where
         A: for<'a> Air<VerifierConstraintFolder<'a, GC>>,
     {
         let ShardProof {
-            shard_chips,
             main_commitment,
             opened_values,
             evaluation_proof,
@@ -469,6 +469,7 @@ where
         if public_values[self.machine.num_pv_elts()..].iter().any(|v| *v != GC::F::zero()) {
             return Err(ShardVerifierError::InvalidPublicValues);
         }
+        let shard_chips = opened_values.chips.keys().cloned().collect::<BTreeSet<_>>();
 
         // Observe the public values.
         challenger.observe_slice(public_values);
@@ -503,6 +504,13 @@ where
             }
         }
 
+        let machine_chip_names =
+            self.machine.chips().iter().map(MachineAir::name).collect::<BTreeSet<_>>();
+
+        if !shard_chips.is_subset(&machine_chip_names) {
+            return Err(ShardVerifierError::InvalidShape);
+        }
+
         let shard_chips = self
             .machine
             .chips()
@@ -511,7 +519,7 @@ where
             .cloned()
             .collect::<BTreeSet<_>>();
 
-        if shard_chips.len() != shard_chips_len {
+        if shard_chips.len() != shard_chips_len || shard_chips_len == 0 {
             return Err(ShardVerifierError::InvalidShape);
         }
 
@@ -525,7 +533,14 @@ where
             .map(|i| i.values.len() + 1)
             .max()
             .unwrap();
-        let beta_seed_dim = max_interaction_arity.next_power_of_two().ilog2();
+
+        let max_interaction_kinds_values = A::Record::interactions_in_public_values()
+            .iter()
+            .map(|kind| kind.num_values() + 1)
+            .max()
+            .unwrap_or(1);
+        let beta_seed_dim =
+            max(max_interaction_arity, max_interaction_kinds_values).next_power_of_two().ilog2();
 
         let alpha = challenger.sample_ext_element::<GC::EF>();
         let beta_seed = (0..beta_seed_dim)

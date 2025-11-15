@@ -30,17 +30,8 @@ pub enum InteractionKind {
     /// Interaction with the program table, loading an instruction at a given pc address.
     Program = 2,
 
-    /// Interaction with instruction oracle.
-    Instruction = 3,
-
-    /// Interaction with the ALU operations.
-    Alu = 4,
-
     /// Interaction with the byte lookup table for byte operations.
     Byte = 5,
-
-    /// Requesting a range check for a given value and range.
-    Range = 6,
 
     /// Interaction with the current CPU state.
     State = 7,
@@ -95,10 +86,7 @@ impl InteractionKind {
         vec![
             InteractionKind::Memory,
             InteractionKind::Program,
-            InteractionKind::Instruction,
-            InteractionKind::Alu,
             InteractionKind::Byte,
-            InteractionKind::Range,
             InteractionKind::State,
             InteractionKind::Syscall,
             InteractionKind::Global,
@@ -115,6 +103,47 @@ impl InteractionKind {
             InteractionKind::PageProtGlobalFinalizeControl,
             InteractionKind::PageProt,
         ]
+    }
+
+    #[must_use]
+    /// The number of `values` sent and received for each interaction kind.
+    pub fn num_values(&self) -> usize {
+        match self {
+            InteractionKind::Memory | InteractionKind::Syscall => 9,
+            InteractionKind::Program => 16,
+            InteractionKind::Byte => 4,
+            InteractionKind::Global => 11,
+
+            InteractionKind::ShaCompress => 25,
+            InteractionKind::Keccak => 106,
+            InteractionKind::GlobalAccumulation => 15,
+
+            InteractionKind::InstructionFetch => 22,
+            InteractionKind::InstructionDecode => 19,
+            InteractionKind::ShaExtend
+            | InteractionKind::PageProt
+            | InteractionKind::PageProtAccess => 6,
+            InteractionKind::State
+            | InteractionKind::PageProtGlobalInitControl
+            | InteractionKind::PageProtGlobalFinalizeControl
+            | InteractionKind::MemoryGlobalInitControl
+            | InteractionKind::MemoryGlobalFinalizeControl => 5,
+        }
+    }
+
+    #[must_use]
+    /// Whether this interaction kind gets used in `eval_public_values`.
+    pub fn appears_in_eval_public_values(&self) -> bool {
+        matches!(
+            self,
+            InteractionKind::Byte
+                | InteractionKind::State
+                | InteractionKind::MemoryGlobalFinalizeControl
+                | InteractionKind::MemoryGlobalInitControl
+                | InteractionKind::PageProtGlobalFinalizeControl
+                | InteractionKind::PageProtGlobalInitControl
+                | InteractionKind::GlobalAccumulation
+        )
     }
 }
 
@@ -188,10 +217,7 @@ impl Display for InteractionKind {
         match self {
             InteractionKind::Memory => write!(f, "Memory"),
             InteractionKind::Program => write!(f, "Program"),
-            InteractionKind::Instruction => write!(f, "Instruction"),
-            InteractionKind::Alu => write!(f, "Alu"),
             InteractionKind::Byte => write!(f, "Byte"),
-            InteractionKind::Range => write!(f, "Range"),
             InteractionKind::State => write!(f, "State"),
             InteractionKind::Syscall => write!(f, "Syscall"),
             InteractionKind::Global => write!(f, "Global"),

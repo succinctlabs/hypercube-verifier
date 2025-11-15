@@ -20,7 +20,6 @@ use sp1_core_executor::{
 };
 use sp1_derive::AlignedBorrow;
 use sp1_hypercube::{air::MachineAir, Word};
-use sp1_primitives::consts::PROT_WRITE;
 use std::{
     borrow::{Borrow, BorrowMut},
     mem::{size_of, MaybeUninit},
@@ -55,9 +54,6 @@ pub struct StoreHalfColumns<T> {
 
     /// Whether this is a store half instruction.
     pub is_real: T,
-
-    /// Whether the page protection is active.
-    pub is_page_protect_active: T,
 }
 
 impl<F> BaseAir<F> for StoreHalfChip {
@@ -119,9 +115,6 @@ impl<F: PrimeField32> MachineAir<F> for StoreHalfChip {
                     if idx < input.memory_store_half_events.len() {
                         let event = &input.memory_store_half_events[idx];
                         self.event_to_row(&event.0, cols, &mut blu);
-                        cols.is_page_protect_active = F::from_canonical_u32(
-                            input.public_values.is_untrusted_programs_enabled,
-                        );
                         cols.state.populate(&mut blu, event.0.clk, event.0.pc);
                         cols.adapter.populate(&mut blu, event.1);
                     }
@@ -207,20 +200,6 @@ where
             local.memory_access,
             local.store_value,
             local.is_real.into(),
-        );
-
-        // Check page protect active is set correctly based on public value and is_real
-        let public_values = builder.extract_public_values();
-        let expected_page_protect_active =
-            public_values.is_untrusted_programs_enabled.into() * local.is_real;
-        builder.assert_eq(local.is_page_protect_active, expected_page_protect_active);
-
-        builder.send_page_prot(
-            clk_high.clone(),
-            clk_low.clone() + AB::Expr::from_canonical_u32(MemoryAccessPosition::Memory as u32),
-            &aligned_addr.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_WRITE),
-            local.is_page_protect_active.into(),
         );
 
         // Step 3. Use the memory value to compute the write value.

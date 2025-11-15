@@ -1,7 +1,6 @@
 use slop_air::{Air, BaseAir};
 use slop_matrix::Matrix;
 use sp1_derive::AlignedBorrow;
-use sp1_primitives::consts::PROT_READ;
 use std::{
     borrow::{Borrow, BorrowMut},
     mem::{size_of, MaybeUninit},
@@ -51,9 +50,6 @@ pub struct LoadDoubleColumns<T> {
 
     /// Whether this is a real load word instruction.
     pub is_real: T,
-
-    /// Whether the page protection is active.
-    pub is_page_protect_active: T,
 }
 
 impl<F> BaseAir<F> for LoadDoubleChip {
@@ -116,9 +112,6 @@ impl<F: PrimeField32> MachineAir<F> for LoadDoubleChip {
                     if idx < input.memory_load_double_events.len() {
                         let event = &input.memory_load_double_events[idx];
                         self.event_to_row(&event.0, cols, &mut blu);
-                        cols.is_page_protect_active = F::from_canonical_u32(
-                            input.public_values.is_untrusted_programs_enabled,
-                        );
                         cols.state.populate(&mut blu, event.0.clk, event.0.pc);
                         cols.adapter.populate(&mut blu, event.1);
                     }
@@ -196,20 +189,6 @@ where
             &aligned_addr.clone().map(Into::into),
             local.memory_access,
             local.is_real,
-        );
-
-        // Check page protect active is set correctly based on public value and is_real
-        let public_values = builder.extract_public_values();
-        let expected_page_protect_active =
-            public_values.is_untrusted_programs_enabled.into() * local.is_real;
-        builder.assert_eq(local.is_page_protect_active, expected_page_protect_active);
-
-        builder.send_page_prot(
-            clk_high.clone(),
-            clk_low.clone() + AB::Expr::from_canonical_u32(MemoryAccessPosition::Memory as u32),
-            &aligned_addr.clone().map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            local.is_page_protect_active.into(),
         );
 
         // This chip requires `op_a != x0`.

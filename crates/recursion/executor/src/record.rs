@@ -8,7 +8,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 use slop_algebra::{AbstractField, Field, PrimeField32};
-use sp1_hypercube::{air::SP1AirBuilder, MachineRecord, PROOF_MAX_NUM_PVS};
+use sp1_hypercube::{air::SP1AirBuilder, InteractionKind, MachineRecord, PROOF_MAX_NUM_PVS};
 
 use crate::{
     instruction::{HintBitsInstr, HintExt2FeltsInstr, HintInstr},
@@ -193,6 +193,10 @@ impl<F: PrimeField32> MachineRecord for ExecutionRecord<F> {
 
     // No public value constraints for recursion public values.
     fn eval_public_values<AB: SP1AirBuilder>(_builder: &mut AB) {}
+
+    fn interactions_in_public_values() -> Vec<InteractionKind> {
+        vec![]
+    }
 }
 
 impl<F: Field> ExecutionRecord<F> {

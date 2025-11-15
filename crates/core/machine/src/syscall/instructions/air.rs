@@ -44,9 +44,6 @@ where
             AB::PublicVar,
         > = public_values_slice.as_slice().borrow();
 
-        // Assert that only the trusted program can call ecall.
-        builder.when(local.is_real).assert_one(local.adapter.is_trusted);
-
         // Convert the syscall code to 8 bytes using the safe API.
         let a_input = U16toU8OperationSafeInput::new(
             local.adapter.prev_a().0.map(Into::into),
@@ -123,9 +120,6 @@ where
 
         // HALT ecall and UNIMPL instruction.
         self.eval_halt_unimpl(builder, local, public_values);
-
-        // PAGE_PROTECT ecall instruction.
-        self.eval_page_protect(builder, local, &a, public_values.is_untrusted_programs_enabled);
     }
 }
 
@@ -364,32 +358,6 @@ impl SyscallInstrsChip {
         builder
             .when(local.is_halt)
             .assert_eq(local.adapter.b().map(Into::into).reduce::<AB>(), public_values.exit_code);
-    }
-
-    pub(crate) fn eval_page_protect<AB: SP1CoreAirBuilder>(
-        &self,
-        builder: &mut AB,
-        local: &SyscallInstrColumns<AB::Var>,
-        prev_a_byte: &[AB::Expr; 8],
-        is_page_protect_active: AB::PublicVar,
-    ) {
-        let syscall_id = prev_a_byte[0].clone();
-
-        // Compute whether this ecall is mprotect.
-        let is_mprotect = {
-            IsZeroOperation::<AB::F>::eval(
-                builder,
-                IsZeroOperationInput::new(
-                    syscall_id.clone()
-                        - AB::Expr::from_canonical_u32(SyscallCode::MPROTECT.syscall_id()),
-                    local.is_page_protect,
-                    local.is_real.into(),
-                ),
-            );
-            local.is_page_protect.result
-        };
-
-        builder.when(is_mprotect).assert_one(is_page_protect_active);
     }
 
     /// Returns a boolean expression indicating whether the instruction is a HALT instruction.

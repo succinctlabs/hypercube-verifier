@@ -1,7 +1,7 @@
 use super::ShaExtendControlChip;
 use crate::{
     air::SP1CoreAirBuilder,
-    operations::{AddrAddOperation, AddressSlicePageProtOperation, SyscallAddrOperation},
+    operations::{AddrAddOperation, SyscallAddrOperation},
     utils::next_multiple_of_32,
 };
 use core::borrow::Borrow;
@@ -18,7 +18,6 @@ use sp1_hypercube::{
     air::{AirInteraction, InteractionScope, MachineAir},
     InteractionKind, Word,
 };
-use sp1_primitives::consts::{PROT_READ, PROT_WRITE};
 use std::{borrow::BorrowMut, iter::once, mem::MaybeUninit};
 
 impl ShaExtendControlChip {
@@ -38,9 +37,6 @@ pub struct ShaExtendControlCols<T> {
     pub w_16th_addr: AddrAddOperation<T>,
     pub w_17th_addr: AddrAddOperation<T>,
     pub w_64th_addr: AddrAddOperation<T>,
-
-    pub initial_page_prot_access: AddressSlicePageProtOperation<T>,
-    pub extension_page_prot_access: AddressSlicePageProtOperation<T>,
 
     pub is_real: T,
 }
@@ -112,33 +108,6 @@ impl<F: PrimeField32> MachineAir<F> for ShaExtendControlChip {
             // Address of 64th element of W, last written element
             cols.w_64th_addr.populate(&mut blu_events, event.w_ptr, 63 * 8);
             cols.is_real = F::one();
-            // Constrain page prot access for initial 16 elements of W, read only
-            if input.public_values.is_untrusted_programs_enabled == 1 {
-                cols.initial_page_prot_access.populate(
-                    &mut blu_events,
-                    event.w_ptr,
-                    event.w_ptr + 15 * 8,
-                    event.clk,
-                    PROT_READ,
-                    &event.page_prot_records.initial_page_prot_records[0],
-                    &event.page_prot_records.initial_page_prot_records.get(1).copied(),
-                    input.public_values.is_untrusted_programs_enabled,
-                );
-                // Constsrain page prot access for extension 48 elements of W, read and write
-                cols.extension_page_prot_access.populate(
-                    &mut blu_events,
-                    event.w_ptr + 16 * 8,
-                    event.w_ptr + 63 * 8,
-                    event.clk + 1,
-                    PROT_READ | PROT_WRITE,
-                    &event.page_prot_records.extension_page_prot_records[0],
-                    &event.page_prot_records.extension_page_prot_records.get(1).copied(),
-                    input.public_values.is_untrusted_programs_enabled,
-                );
-            } else {
-                cols.initial_page_prot_access = AddressSlicePageProtOperation::default();
-                cols.extension_page_prot_access = AddressSlicePageProtOperation::default();
-            }
         });
 
         output.add_byte_lookup_events(blu_events);
@@ -207,28 +176,6 @@ where
                 AB::Expr::zero(),
             ]),
             local.w_64th_addr,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into(),
-            &w_ptr.map(Into::into),
-            &local.w_16th_addr.value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.initial_page_prot_access,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::one(),
-            &local.w_17th_addr.value.map(Into::into),
-            &local.w_64th_addr.value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ | PROT_WRITE),
-            &local.extension_page_prot_access,
             local.is_real.into(),
         );
 

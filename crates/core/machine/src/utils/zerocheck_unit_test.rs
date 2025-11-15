@@ -247,7 +247,6 @@ mod tests {
         let opening = ChipOpenedValues::<F, EF> {
             preprocessed: AirOpenedValues { local: vec![] },
             main: AirOpenedValues { local: column_openings.clone() },
-            local_cumulative_sum: EF::zero(),
             degree: Point::from_usize(num_real_entries as usize, num_variables as usize + 1),
         };
 

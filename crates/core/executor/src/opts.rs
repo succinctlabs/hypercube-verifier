@@ -96,6 +96,8 @@ impl SplitOpts {
     /// Create a new [`SplitOpts`] with the given [`SP1CoreOpts`] and the program size.
     #[must_use]
     pub fn new(opts: &SP1CoreOpts, program_size: usize, page_protect_allowed: bool) -> Self {
+        assert!(!page_protect_allowed, "page protection is turned off");
+
         let costs = rv64im_costs();
 
         let mut available_trace_area = opts.sharding_threshold.element_threshold;
@@ -130,34 +132,20 @@ impl SplitOpts {
         let memory = trunc_32(
             (available_trace_area as usize / cost_per_memory).min(max_height as usize) / 2,
         );
-        let cost_per_page_prot =
-            costs[&RiscvAirId::PageProtGlobalInit] + costs[&RiscvAirId::Global];
-        let page_prot = trunc_32(
-            (available_trace_area as usize / cost_per_page_prot).min(max_height as usize) / 2,
-        );
 
         // Allocate `2/3` of the trace area to the usual trace area.
         let pack_trace_threshold = 2 * opts.sharding_threshold.element_threshold / 3;
-        // Allocate `3/10` of the trace area to `MemoryGlobal` and `PageProtGlobal`.
-        let mut combine_memory_threshold =
-            trunc_32(3 * opts.sharding_threshold.element_threshold as usize / cost_per_memory / 40);
-        let mut combine_page_prot_threshold = trunc_32(
-            3 * opts.sharding_threshold.element_threshold as usize / cost_per_page_prot / 40,
-        );
-
-        // If page protection is off, use the `3/10` of the trace area for `MemoryGlobal` only.
-        if !page_protect_allowed {
-            combine_memory_threshold *= 2;
-            combine_page_prot_threshold = 0;
-        }
+        // Allocate `3/10` of the trace area to `MemoryGlobal`.
+        let combine_memory_threshold =
+            trunc_32(3 * opts.sharding_threshold.element_threshold as usize / cost_per_memory / 20);
 
         Self {
             pack_trace_threshold,
             combine_memory_threshold,
-            combine_page_prot_threshold,
+            combine_page_prot_threshold: 0,
             syscall_threshold,
             memory,
-            page_prot,
+            page_prot: 0,
         }
     }
 }

@@ -7,10 +7,7 @@ use std::{
 use crate::{
     air::SP1CoreAirBuilder,
     memory::MemoryAccessColsU8,
-    operations::{
-        field::range::FieldLtCols, AddrAddOperation, AddressSlicePageProtOperation,
-        SyscallAddrOperation,
-    },
+    operations::{field::range::FieldLtCols, AddrAddOperation, SyscallAddrOperation},
     utils::{limbs_to_words, next_multiple_of_32},
 };
 use generic_array::GenericArray;
@@ -33,10 +30,7 @@ use sp1_hypercube::{
     air::{InteractionScope, MachineAir},
     Word,
 };
-use sp1_primitives::{
-    consts::{PROT_READ, PROT_WRITE},
-    polynomial::Polynomial,
-};
+use sp1_primitives::polynomial::Polynomial;
 
 use crate::{operations::field::field_op::FieldOpCols, utils::words_to_bytes_le_vec};
 
@@ -64,8 +58,6 @@ pub struct FpOpCols<T, P: FpOpField> {
     pub y_addrs: GenericArray<AddrAddOperation<T>, P::WordsFieldElement>,
     pub x_access: GenericArray<MemoryAccessColsU8<T>, P::WordsFieldElement>,
     pub y_access: GenericArray<MemoryAccessColsU8<T>, P::WordsFieldElement>,
-    pub read_slice_page_prot_access: AddressSlicePageProtOperation<T>,
-    pub write_slice_page_prot_access: AddressSlicePageProtOperation<T>,
     pub(crate) output: FieldOpCols<T, P>,
     pub(crate) output_range: FieldLtCols<T, P>,
 }
@@ -176,32 +168,6 @@ impl<F: PrimeField32, P: FpOpField> MachineAir<F> for FpOpChip<P> {
                 let record = MemoryRecordEnum::Write(event.x_memory_records[i]);
                 cols.x_access[i].populate(record, &mut new_byte_lookup_events);
                 cols.x_addrs[i].populate(&mut new_byte_lookup_events, event.x_ptr, i as u64 * 8);
-            }
-            if input.public_values.is_untrusted_programs_enabled == 1 {
-                cols.read_slice_page_prot_access.populate(
-                    &mut new_byte_lookup_events,
-                    event.y_ptr,
-                    event.y_ptr + 8 * (cols.y_addrs.len() - 1) as u64,
-                    event.clk,
-                    PROT_READ,
-                    &event.page_prot_records.read_page_prot_records[0],
-                    &event.page_prot_records.read_page_prot_records.get(1).copied(),
-                    input.public_values.is_untrusted_programs_enabled,
-                );
-
-                cols.write_slice_page_prot_access.populate(
-                    &mut new_byte_lookup_events,
-                    event.x_ptr,
-                    event.x_ptr + 8 * (cols.x_addrs.len() - 1) as u64,
-                    event.clk + 1,
-                    PROT_READ | PROT_WRITE,
-                    &event.page_prot_records.write_page_prot_records[0],
-                    &event.page_prot_records.write_page_prot_records.get(1).copied(),
-                    input.public_values.is_untrusted_programs_enabled,
-                );
-            } else {
-                cols.read_slice_page_prot_access = AddressSlicePageProtOperation::default();
-                cols.write_slice_page_prot_access = AddressSlicePageProtOperation::default();
             }
         });
 
@@ -381,28 +347,6 @@ where
             y_ptr.map(Into::into),
             local.is_real,
             InteractionScope::Local,
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into(),
-            &local.y_ptr.addr.map(Into::into),
-            &local.y_addrs[local.y_addrs.len() - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.read_slice_page_prot_access,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::one(),
-            &local.x_ptr.addr.map(Into::into),
-            &local.x_addrs[local.x_addrs.len() - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ | PROT_WRITE),
-            &local.write_slice_page_prot_access,
-            local.is_real.into(),
         );
     }
 }

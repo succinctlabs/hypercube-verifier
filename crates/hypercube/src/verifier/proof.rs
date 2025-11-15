@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 use slop_challenger::IopCtx;
@@ -49,8 +49,6 @@ pub struct ShardProof<GC: IopCtx, C: MachineConfig<GC>> {
     pub opened_values: ShardOpenedValues<GC::F, GC::EF>,
     /// The evaluation proof.
     pub evaluation_proof: JaggedPcsProof<GC, C>,
-    /// The chips participating in the shard.
-    pub shard_chips: BTreeSet<String>,
 }
 
 /// The values of the chips in the shard at a random point.
@@ -70,8 +68,6 @@ pub struct ChipOpenedValues<F, EF> {
     pub preprocessed: AirOpenedValues<EF>,
     /// The opening of the main trace.
     pub main: AirOpenedValues<EF>,
-    /// The local cumulative sum.
-    pub local_cumulative_sum: EF,
     /// The big-endian bit representation of the degree of the chip.
     pub degree: Point<F>,
 }

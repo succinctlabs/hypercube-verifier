@@ -6,7 +6,7 @@ use crate::{
             field_inner_product::FieldInnerProductCols, field_op::FieldOpCols,
             field_sqrt::FieldSqrtCols, range::FieldLtCols,
         },
-        AddrAddOperation, AddressSlicePageProtOperation, SyscallAddrOperation,
+        AddrAddOperation, SyscallAddrOperation,
     },
     utils::{bytes_to_words_le_vec, limbs_to_words, next_multiple_of_32},
 };
@@ -38,10 +38,7 @@ use sp1_hypercube::{
     air::{BaseAirBuilder, InteractionScope, MachineAir},
     Word,
 };
-use sp1_primitives::{
-    consts::{PROT_READ, PROT_WRITE},
-    polynomial::Polynomial,
-};
+use sp1_primitives::polynomial::Polynomial;
 use std::{fmt::Debug, marker::PhantomData, mem::MaybeUninit};
 use typenum::Unsigned;
 
@@ -64,8 +61,6 @@ pub struct WeierstrassDecompressCols<T, P: FieldParameters + NumWords> {
     pub x_access: GenericArray<MemoryAccessColsU8<T>, P::WordsFieldElement>,
     pub y_access: GenericArray<MemoryAccessCols<T>, P::WordsFieldElement>,
     pub y_value: GenericArray<Word<T>, P::WordsFieldElement>,
-    pub read_slice_page_prot_access: AddressSlicePageProtOperation<T>,
-    pub write_slice_page_prot_access: AddressSlicePageProtOperation<T>,
     pub(crate) range_x: FieldLtCols<T, P>,
     pub(crate) neg_y_range_check: FieldLtCols<T, P>,
     pub(crate) x_2: FieldOpCols<T, P>,
@@ -255,33 +250,6 @@ impl<F: PrimeField32, E: EllipticCurve + WeierstrassParameters> MachineAir<F>
                 cols.y_access[i].populate(record, &mut new_byte_lookup_events);
                 cols.y_value[i] = Word::from(current_record.value);
                 cols.y_addrs[i].populate(&mut new_byte_lookup_events, event.ptr, 8 * i as u64);
-            }
-
-            if input.public_values.is_untrusted_programs_enabled == 1 {
-                cols.read_slice_page_prot_access.populate(
-                    &mut new_byte_lookup_events,
-                    event.ptr + num_limbs as u64,
-                    event.ptr + num_limbs as u64 + 8 * (cols.x_addrs.len() - 1) as u64,
-                    event.clk,
-                    PROT_READ,
-                    &event.page_prot_records.read_page_prot_records[0],
-                    &event.page_prot_records.read_page_prot_records.get(1).copied(),
-                    input.public_values.is_untrusted_programs_enabled,
-                );
-
-                cols.write_slice_page_prot_access.populate(
-                    &mut new_byte_lookup_events,
-                    event.ptr,
-                    event.ptr + 8 * (cols.y_addrs.len() - 1) as u64,
-                    event.clk + 1,
-                    PROT_WRITE,
-                    &event.page_prot_records.write_page_prot_records[0],
-                    &event.page_prot_records.write_page_prot_records.get(1).copied(),
-                    input.public_values.is_untrusted_programs_enabled,
-                );
-            } else {
-                cols.read_slice_page_prot_access = AddressSlicePageProtOperation::default();
-                cols.write_slice_page_prot_access = AddressSlicePageProtOperation::default();
             }
 
             if matches!(self.sign_rule, SignChoiceRule::Lexicographic) {
@@ -595,28 +563,6 @@ where
                 local.is_real,
             );
         }
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into(),
-            &local.x_addrs[0].value.map(Into::into),
-            &local.x_addrs[local.x_addrs.len() - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.read_slice_page_prot_access,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::one(),
-            &local.ptr.addr.map(Into::into),
-            &local.y_addrs[local.y_addrs.len() - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_WRITE),
-            &local.write_slice_page_prot_access,
-            local.is_real.into(),
-        );
 
         let syscall_id = match E::CURVE_TYPE {
             CurveType::Secp256k1 => {

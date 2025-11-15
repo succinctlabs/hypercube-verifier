@@ -7,7 +7,7 @@ use std::{fmt::Debug, marker::PhantomData};
 use crate::{
     air::SP1CoreAirBuilder,
     memory::MemoryAccessColsU8,
-    operations::{AddrAddOperation, AddressSlicePageProtOperation, SyscallAddrOperation},
+    operations::{AddrAddOperation, SyscallAddrOperation},
     utils::{limbs_to_words, next_multiple_of_32},
 };
 use hashbrown::HashMap;
@@ -37,7 +37,6 @@ use sp1_hypercube::{
     air::{InteractionScope, MachineAir},
     Word,
 };
-use sp1_primitives::consts::{PROT_READ, PROT_WRITE};
 
 use crate::operations::field::{
     field_den::FieldDenCols, field_inner_product::FieldInnerProductCols, field_op::FieldOpCols,
@@ -61,8 +60,6 @@ pub struct EdAddAssignCols<T> {
     pub q_addrs_add: [AddrAddOperation<T>; WORDS_CURVE_POINT],
     pub p_access: [MemoryAccessColsU8<T>; WORDS_CURVE_POINT],
     pub q_access: [MemoryAccessColsU8<T>; WORDS_CURVE_POINT],
-    pub read_slice_page_prot_access: AddressSlicePageProtOperation<T>,
-    pub write_slice_page_prot_access: AddressSlicePageProtOperation<T>,
     pub(crate) x3_numerator: FieldInnerProductCols<T, Ed25519BaseField>,
     pub(crate) y3_numerator: FieldInnerProductCols<T, Ed25519BaseField>,
     pub(crate) x1_mul_y1: FieldOpCols<T, Ed25519BaseField>,
@@ -244,7 +241,7 @@ impl<E: EllipticCurve + EdwardsParameters> EdAddAssignChip<E> {
         &self,
         event: &EllipticCurveAddEvent,
         cols: &mut EdAddAssignCols<F>,
-        page_prot_enabled: u32,
+        _page_prot_enabled: u32,
         blu: &mut impl ByteRecord,
     ) {
         // Decode affine points.
@@ -275,32 +272,6 @@ impl<E: EllipticCurve + EdwardsParameters> EdAddAssignChip<E> {
             let record = MemoryRecordEnum::Write(event.p_memory_records[i]);
             cols.p_addrs_add[i].populate(blu, event.p_ptr, i as u64 * 8);
             cols.p_access[i].populate(record, blu);
-        }
-        if page_prot_enabled == 1 {
-            cols.read_slice_page_prot_access.populate(
-                blu,
-                event.q_ptr,
-                event.q_ptr + 8 * (WORDS_CURVE_POINT - 1) as u64,
-                event.clk,
-                PROT_READ,
-                &event.page_prot_records.read_page_prot_records[0],
-                &event.page_prot_records.read_page_prot_records.get(1).copied(),
-                page_prot_enabled,
-            );
-
-            cols.write_slice_page_prot_access.populate(
-                blu,
-                event.p_ptr,
-                event.p_ptr + 8 * (WORDS_CURVE_POINT - 1) as u64,
-                event.clk + 1,
-                PROT_READ | PROT_WRITE,
-                &event.page_prot_records.write_page_prot_records[0],
-                &event.page_prot_records.write_page_prot_records.get(1).copied(),
-                page_prot_enabled,
-            );
-        } else {
-            cols.read_slice_page_prot_access = AddressSlicePageProtOperation::default();
-            cols.write_slice_page_prot_access = AddressSlicePageProtOperation::default();
         }
     }
 }
@@ -434,28 +405,6 @@ where
             q_ptr.map(Into::into),
             local.is_real,
             InteractionScope::Local,
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into(),
-            &local.q_ptr.addr.map(Into::into),
-            &local.q_addrs_add[WORDS_CURVE_POINT - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.read_slice_page_prot_access,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::one(),
-            &local.p_ptr.addr.map(Into::into),
-            &local.p_addrs_add[WORDS_CURVE_POINT - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ | PROT_WRITE),
-            &local.write_slice_page_prot_access,
-            local.is_real.into(),
         );
     }
 }

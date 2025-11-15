@@ -3,7 +3,7 @@ use crate::{
     memory::MemoryAccessColsU8,
     operations::{
         field::{field_op::FieldOpCols, range::FieldLtCols},
-        AddrAddOperation, AddressSlicePageProtOperation, SyscallAddrOperation,
+        AddrAddOperation, SyscallAddrOperation,
     },
     utils::{limbs_to_words, next_multiple_of_32, zeroed_f_vec},
 };
@@ -36,10 +36,7 @@ use sp1_hypercube::{
     air::{InteractionScope, MachineAir},
     Word,
 };
-use sp1_primitives::{
-    consts::{PROT_READ, PROT_WRITE},
-    polynomial::Polynomial,
-};
+use sp1_primitives::polynomial::Polynomial;
 use std::{fmt::Debug, marker::PhantomData, mem::MaybeUninit};
 use typenum::Unsigned;
 
@@ -75,8 +72,6 @@ pub struct WeierstrassAddAssignCols<T, P: FieldParameters + NumWords> {
     pub slope_times_p_x_minus_x: FieldOpCols<T, P>,
     pub x3_range: FieldLtCols<T, P>,
     pub y3_range: FieldLtCols<T, P>,
-    pub read_slice_page_prot_access: AddressSlicePageProtOperation<T>,
-    pub write_slice_page_prot_access: AddressSlicePageProtOperation<T>,
 }
 
 #[derive(Default)]
@@ -515,28 +510,6 @@ where
             local.is_real,
             InteractionScope::Local,
         );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into(),
-            &local.q_ptr.addr.map(Into::into),
-            &local.q_addrs[local.q_addrs.len() - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.read_slice_page_prot_access,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::one(),
-            &local.p_ptr.addr.map(Into::into),
-            &local.p_addrs[local.p_addrs.len() - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ | PROT_WRITE),
-            &local.write_slice_page_prot_access,
-            local.is_real.into(),
-        );
     }
 }
 
@@ -544,7 +517,7 @@ impl<E: EllipticCurve> WeierstrassAddAssignChip<E> {
     pub fn populate_row<F: PrimeField32>(
         event: &EllipticCurveAddEvent,
         cols: &mut WeierstrassAddAssignCols<F, E::BaseField>,
-        page_prot_enabled: u32,
+        _page_prot_enabled: u32,
         new_byte_lookup_events: &mut Vec<ByteLookupEvent>,
     ) {
         // Decode affine points.
@@ -575,32 +548,6 @@ impl<E: EllipticCurve> WeierstrassAddAssignChip<E> {
             let record = MemoryRecordEnum::Write(event.p_memory_records[i]);
             cols.p_access[i].populate(record, new_byte_lookup_events);
             cols.p_addrs[i].populate(new_byte_lookup_events, event.p_ptr, 8 * i as u64);
-        }
-        if page_prot_enabled == 1 {
-            cols.read_slice_page_prot_access.populate(
-                new_byte_lookup_events,
-                event.q_ptr,
-                event.q_ptr + 8 * (cols.q_addrs.len() - 1) as u64,
-                event.clk,
-                PROT_READ,
-                &event.page_prot_records.read_page_prot_records[0],
-                &event.page_prot_records.read_page_prot_records.get(1).copied(),
-                page_prot_enabled,
-            );
-
-            cols.write_slice_page_prot_access.populate(
-                new_byte_lookup_events,
-                event.p_ptr,
-                event.p_ptr + 8 * (cols.p_addrs.len() - 1) as u64,
-                event.clk + 1,
-                PROT_READ | PROT_WRITE,
-                &event.page_prot_records.write_page_prot_records[0],
-                &event.page_prot_records.write_page_prot_records.get(1).copied(),
-                page_prot_enabled,
-            );
-        } else {
-            cols.read_slice_page_prot_access = AddressSlicePageProtOperation::default();
-            cols.write_slice_page_prot_access = AddressSlicePageProtOperation::default();
         }
     }
 }

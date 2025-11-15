@@ -85,7 +85,6 @@ pub fn dummy_shard_proof<A: MachineAir<SP1Field>>(
                                 local: vec![EF::zero(); chip.preprocessed_width()],
                             },
                             main: AirOpenedValues { local: vec![EF::zero(); chip.air.width()] },
-                            local_cumulative_sum: EF::zero(),
                             degree: Point::from_usize(0, max_log_row_count + 1),
                         },
                     )
@@ -93,6 +92,5 @@ pub fn dummy_shard_proof<A: MachineAir<SP1Field>>(
                 .collect(),
         },
         evaluation_proof,
-        shard_chips: shard_chips.iter().map(|chip| chip.air.name().clone()).collect(),
     }
 }

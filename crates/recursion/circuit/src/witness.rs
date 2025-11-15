@@ -255,15 +255,13 @@ impl<C: CircuitConfig> Witnessable<C> for ChipOpenedValues<SP1Field, SP1Extensio
     fn read(&self, builder: &mut Builder<C>) -> Self::WitnessVariable {
         let preprocessed = self.preprocessed.read(builder);
         let main = self.main.read(builder);
-        let local_cumulative_sum = self.local_cumulative_sum.read(builder);
         let degree = self.degree.read(builder);
-        Self::WitnessVariable { preprocessed, main, local_cumulative_sum, degree }
+        Self::WitnessVariable { preprocessed, main, degree }
     }
 
     fn write(&self, witness: &mut impl WitnessWriter<C>) {
         self.preprocessed.write(witness);
         self.main.write(witness);
-        self.local_cumulative_sum.write(witness);
         self.degree.write(witness);
     }
 }
@@ -313,7 +311,6 @@ where
             public_values,
             logup_gkr_proof,
             evaluation_proof,
-            shard_chips: self.shard_chips.clone(),
         }
     }
 

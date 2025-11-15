@@ -3,7 +3,7 @@ use crate::{
     memory::MemoryAccessColsU8,
     operations::{
         field::{field_op::FieldOpCols, range::FieldLtCols},
-        AddrAddOperation, AddressSlicePageProtOperation, SyscallAddrOperation,
+        AddrAddOperation, SyscallAddrOperation,
     },
     utils::{limbs_to_words, next_multiple_of_32, zeroed_f_vec},
 };
@@ -36,7 +36,6 @@ use sp1_hypercube::{
     air::{InteractionScope, MachineAir},
     Word,
 };
-use sp1_primitives::consts::{PROT_READ, PROT_WRITE};
 use std::{fmt::Debug, marker::PhantomData, mem::MaybeUninit};
 
 pub const fn num_weierstrass_double_cols<P: FieldParameters + NumWords>() -> usize {
@@ -69,7 +68,6 @@ pub struct WeierstrassDoubleAssignCols<T, P: FieldParameters + NumWords> {
     pub slope_times_p_x_minus_x: FieldOpCols<T, P>,
     pub x3_range: FieldLtCols<T, P>,
     pub y3_range: FieldLtCols<T, P>,
-    pub write_slice_page_prot_access: AddressSlicePageProtOperation<T>,
 }
 
 #[derive(Default)]
@@ -342,7 +340,7 @@ impl<E: EllipticCurve + WeierstrassParameters> WeierstrassDoubleAssignChip<E> {
         event: &EllipticCurveDoubleEvent,
         cols: &mut WeierstrassDoubleAssignCols<F, E::BaseField>,
         new_byte_lookup_events: &mut Vec<ByteLookupEvent>,
-        page_prot_enabled: u32,
+        _page_prot_enabled: u32,
     ) {
         // Decode affine points.
         let p = &event.p;
@@ -362,20 +360,6 @@ impl<E: EllipticCurve + WeierstrassParameters> WeierstrassDoubleAssignChip<E> {
             let record = MemoryRecordEnum::Write(event.p_memory_records[i]);
             cols.p_access[i].populate(record, new_byte_lookup_events);
             cols.p_addrs[i].populate(new_byte_lookup_events, event.p_ptr, 8 * i as u64);
-        }
-        if page_prot_enabled == 1 {
-            cols.write_slice_page_prot_access.populate(
-                new_byte_lookup_events,
-                event.p_ptr,
-                event.p_ptr + 8 * (cols.p_addrs.len() - 1) as u64,
-                event.clk,
-                PROT_READ | PROT_WRITE,
-                &event.write_slice_page_prot_access[0],
-                &event.write_slice_page_prot_access.get(1).copied(),
-                page_prot_enabled,
-            );
-        } else {
-            cols.write_slice_page_prot_access = AddressSlicePageProtOperation::default();
         }
     }
 }
@@ -543,17 +527,6 @@ where
             [AB::Expr::zero(), AB::Expr::zero(), AB::Expr::zero()].map(Into::into),
             local.is_real,
             InteractionScope::Local,
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into(),
-            &local.p_ptr.addr.map(Into::into),
-            &local.p_addrs[local.p_addrs.len() - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ | PROT_WRITE),
-            &local.write_slice_page_prot_access,
-            local.is_real.into(),
         );
     }
 }

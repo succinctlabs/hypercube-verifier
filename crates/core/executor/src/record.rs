@@ -831,6 +831,14 @@ impl MachineRecord for ExecutionRecord {
         Self::eval_global_page_prot_init(public_values, builder);
         Self::eval_global_page_prot_finalize(public_values, builder);
     }
+
+    fn interactions_in_public_values() -> Vec<InteractionKind> {
+        InteractionKind::all_kinds()
+            .iter()
+            .filter(|kind| kind.appears_in_eval_public_values())
+            .copied()
+            .collect()
+    }
 }
 
 impl ByteRecord for ExecutionRecord {

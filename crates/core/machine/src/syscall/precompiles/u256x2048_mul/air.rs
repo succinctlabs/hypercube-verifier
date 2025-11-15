@@ -1,10 +1,7 @@
 use crate::{
     air::SP1CoreAirBuilder,
     memory::{MemoryAccessCols, MemoryAccessColsU8},
-    operations::{
-        field::field_op::FieldOpCols, AddrAddOperation, AddressSlicePageProtOperation,
-        SyscallAddrOperation,
-    },
+    operations::{field::field_op::FieldOpCols, AddrAddOperation, SyscallAddrOperation},
     utils::{limbs_to_words, next_multiple_of_32, words_to_bytes_le},
 };
 use itertools::Itertools;
@@ -26,18 +23,12 @@ use sp1_hypercube::{
     air::{InteractionScope, MachineAir},
     Word,
 };
-use sp1_primitives::{
-    consts::{PROT_READ, PROT_WRITE},
-    polynomial::Polynomial,
-};
+use sp1_primitives::polynomial::Polynomial;
 use std::{
     borrow::{Borrow, BorrowMut},
     mem::{size_of, MaybeUninit},
 };
 use typenum::Unsigned;
-
-const U256_NUM_WORDS: usize = 4;
-const U2048_NUM_WORDS: usize = 32;
 
 /// The number of columns in the U256x2048MulCols.
 const NUM_COLS: usize = size_of::<U256x2048MulCols<u8>>();
@@ -100,11 +91,6 @@ pub struct U256x2048MulCols<T> {
     pub ab7_plus_carry: FieldOpCols<T, U256Field>,
     pub ab8_plus_carry: FieldOpCols<T, U256Field>,
     pub is_real: T,
-
-    pub address_slice_page_prot_access_a: AddressSlicePageProtOperation<T>,
-    pub address_slice_page_prot_access_b: AddressSlicePageProtOperation<T>,
-    pub address_slice_page_prot_access_lo: AddressSlicePageProtOperation<T>,
-    pub address_slice_page_prot_access_hi: AddressSlicePageProtOperation<T>,
 }
 
 impl<F: PrimeField32> MachineAir<F> for U256x2048MulChip {
@@ -255,61 +241,6 @@ impl<F: PrimeField32> MachineAir<F> for U256x2048MulChip {
                                 &effective_modulus,
                             );
                             carries[i + 1] = carry;
-                        }
-                        if input.public_values.is_untrusted_programs_enabled == 1 {
-                            // Populate the address slice page prot access.
-                            cols.address_slice_page_prot_access_a.populate(
-                                &mut new_byte_lookup_events,
-                                event.a_ptr,
-                                event.a_ptr + ((U256_NUM_WORDS - 1) * 8) as u64,
-                                event.clk,
-                                PROT_READ,
-                                &event.page_prot_records.read_a_page_prot_records[0],
-                                &event.page_prot_records.read_a_page_prot_records.get(1).copied(),
-                                input.public_values.is_untrusted_programs_enabled,
-                            );
-
-                            cols.address_slice_page_prot_access_b.populate(
-                                &mut new_byte_lookup_events,
-                                event.b_ptr,
-                                event.b_ptr + ((U2048_NUM_WORDS - 1) * 8) as u64,
-                                event.clk + 1,
-                                PROT_READ,
-                                &event.page_prot_records.read_b_page_prot_records[0],
-                                &event.page_prot_records.read_b_page_prot_records.get(1).copied(),
-                                input.public_values.is_untrusted_programs_enabled,
-                            );
-
-                            cols.address_slice_page_prot_access_lo.populate(
-                                &mut new_byte_lookup_events,
-                                event.lo_ptr,
-                                event.lo_ptr + ((32 - 1) * 8) as u64,
-                                event.clk + 2,
-                                PROT_WRITE,
-                                &event.page_prot_records.write_lo_page_prot_records[0],
-                                &event.page_prot_records.write_lo_page_prot_records.get(1).copied(),
-                                input.public_values.is_untrusted_programs_enabled,
-                            );
-
-                            cols.address_slice_page_prot_access_hi.populate(
-                                &mut new_byte_lookup_events,
-                                event.hi_ptr,
-                                event.hi_ptr + ((4 - 1) * 8) as u64,
-                                event.clk + 3,
-                                PROT_WRITE,
-                                &event.page_prot_records.write_hi_page_prot_records[0],
-                                &event.page_prot_records.write_hi_page_prot_records.get(1).copied(),
-                                input.public_values.is_untrusted_programs_enabled,
-                            );
-                        } else {
-                            cols.address_slice_page_prot_access_a =
-                                AddressSlicePageProtOperation::default();
-                            cols.address_slice_page_prot_access_b =
-                                AddressSlicePageProtOperation::default();
-                            cols.address_slice_page_prot_access_lo =
-                                AddressSlicePageProtOperation::default();
-                            cols.address_slice_page_prot_access_hi =
-                                AddressSlicePageProtOperation::default();
                         }
                     }
                 })
@@ -567,49 +498,5 @@ where
                 .assert_eq(local.hi_ptr.addr[i], local.hi_ptr_memory.prev_value[i]);
         }
         builder.assert_eq(local.hi_ptr_memory.prev_value[3], AB::Expr::zero());
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into(),
-            &a_ptr.map(Into::into),
-            &local.a_addrs.last().unwrap().value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.address_slice_page_prot_access_a,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::from_canonical_u8(1),
-            &b_ptr.map(Into::into),
-            &local.b_addrs.last().unwrap().value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.address_slice_page_prot_access_b,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::from_canonical_u8(2),
-            &lo_ptr.map(Into::into),
-            &local.lo_addrs.last().unwrap().value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_WRITE),
-            &local.address_slice_page_prot_access_lo,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::from_canonical_u8(3),
-            &hi_ptr.map(Into::into),
-            &local.hi_addrs.last().unwrap().value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_WRITE),
-            &local.address_slice_page_prot_access_hi,
-            local.is_real.into(),
-        );
     }
 }

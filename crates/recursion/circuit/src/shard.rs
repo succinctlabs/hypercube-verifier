@@ -45,8 +45,6 @@ pub struct ShardProofVariable<C: CircuitConfig, SC: SP1FieldConfigVariable<C> + 
     pub public_values: Vec<Felt<SP1Field>>,
     // TODO: The `LogUp+GKR` IOP proofs.
     pub logup_gkr_proof: LogupGkrProof<Ext<SP1Field, SP1ExtensionField>>,
-    /// The chips participating in the shard.
-    pub shard_chips: BTreeSet<String>,
     /// The evaluation proof.
     pub evaluation_proof: JaggedPcsProofVariable<RecursiveBasefoldProof<C, SC>, SC::DigestVariable>,
 }
@@ -155,7 +153,6 @@ where
             evaluation_proof,
             zerocheck_proof,
             public_values,
-            shard_chips,
             logup_gkr_proof,
         } = proof;
 
@@ -167,7 +164,7 @@ where
             .collect::<BTreeMap<_, _>>();
         let mut height_felts_map: BTreeMap<String, Felt<SP1Field>> = BTreeMap::new();
         let two = SymbolicFelt::from_canonical_u32(2);
-        for (name, height) in heights {
+        for (name, height) in &heights {
             let mut acc = SymbolicFelt::zero();
             // Assert max height to avoid overflow during prefix-sum-checks.
             assert!(height.len() == self.pcs_verifier.max_log_row_count + 1);
@@ -188,7 +185,7 @@ where
 
         // Observe the main commitment.
         challenger.observe(builder, *main_commitment);
-        let num_chips: Felt<GC::F> = builder.eval(GC::F::from_canonical_usize(shard_chips.len()));
+        let num_chips: Felt<GC::F> = builder.eval(GC::F::from_canonical_usize(heights.len()));
         // Observe the number of chips.
         challenger.observe(builder, num_chips);
 
@@ -222,7 +219,7 @@ where
             .machine
             .chips()
             .iter()
-            .filter(|chip| shard_chips.contains(&chip.name()))
+            .filter(|chip| heights.contains_key(&chip.name()))
             .cloned()
             .collect::<BTreeSet<_>>();
 

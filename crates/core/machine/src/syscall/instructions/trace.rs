@@ -141,11 +141,6 @@ impl SyscallInstrsChip {
             syscall_id - F::from_canonical_u32(SyscallCode::COMMIT.syscall_id()),
         );
 
-        // Populate `is_page_protect`.
-        cols.is_page_protect.populate_from_field_element(
-            syscall_id - F::from_canonical_u32(SyscallCode::MPROTECT.syscall_id()),
-        );
-
         // Populate `is_commit_deferred_proofs`.
         cols.is_commit_deferred_proofs.populate_from_field_element(
             syscall_id - F::from_canonical_u32(SyscallCode::COMMIT_DEFERRED_PROOFS.syscall_id()),

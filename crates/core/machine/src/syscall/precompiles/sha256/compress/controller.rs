@@ -1,7 +1,7 @@
 use super::ShaCompressControlChip;
 use crate::{
     air::SP1CoreAirBuilder,
-    operations::{AddrAddOperation, AddressSlicePageProtOperation, SyscallAddrOperation},
+    operations::{AddrAddOperation, SyscallAddrOperation},
     utils::{next_multiple_of_32, u32_to_half_word},
 };
 use core::borrow::Borrow;
@@ -18,7 +18,6 @@ use sp1_hypercube::{
     air::{AirInteraction, InteractionScope, MachineAir},
     InteractionKind, Word,
 };
-use sp1_primitives::consts::{PROT_READ, PROT_WRITE};
 use std::{borrow::BorrowMut, iter::once, mem::MaybeUninit};
 
 impl ShaCompressControlChip {
@@ -46,9 +45,6 @@ pub struct ShaCompressControlCols<T> {
     pub is_real: T,
     pub initial_state: [[T; 2]; 8],
     pub final_state: [[T; 2]; 8],
-    pub h_read_page_prot_access: AddressSlicePageProtOperation<T>,
-    pub w_read_page_prot_access: AddressSlicePageProtOperation<T>,
-    pub h_write_page_prot_access: AddressSlicePageProtOperation<T>,
 }
 
 impl<F> BaseAir<F> for ShaCompressControlChip {
@@ -126,47 +122,6 @@ impl<F: PrimeField32> MachineAir<F> for ShaCompressControlChip {
                 // The `value` here is the resulting hash values, which are incremented by
                 // `a, b, c, d, e, f, g, h` values - therefore, we do a subtraction here.
                 cols.final_state[i] = u32_to_half_word((value as u32).wrapping_sub(prev_value));
-            }
-            if input.public_values.is_untrusted_programs_enabled == 1 {
-                // Constrain page prot access for reading initial h state
-                cols.h_read_page_prot_access.populate(
-                    &mut blu_events,
-                    event.h_ptr,
-                    event.h_ptr + OFFSET_LAST_ELEM_H * 8,
-                    event.clk,
-                    PROT_READ,
-                    &event.page_prot_access.h_read_page_prot_records[0],
-                    &event.page_prot_access.h_read_page_prot_records.get(1).copied(),
-                    input.public_values.is_untrusted_programs_enabled,
-                );
-
-                // Constrain page prot access for reading w state to feed into compress
-                cols.w_read_page_prot_access.populate(
-                    &mut blu_events,
-                    event.w_ptr,
-                    event.w_ptr + OFFSET_LAST_ELEM_W * 8,
-                    event.clk + 1,
-                    PROT_READ,
-                    &event.page_prot_access.w_read_page_prot_records[0],
-                    &event.page_prot_access.w_read_page_prot_records.get(1).copied(),
-                    input.public_values.is_untrusted_programs_enabled,
-                );
-
-                // Constrain page prot access for writing final h after compress completed
-                cols.h_write_page_prot_access.populate(
-                    &mut blu_events,
-                    event.h_ptr,
-                    event.h_ptr + OFFSET_LAST_ELEM_H * 8,
-                    event.clk + 2,
-                    PROT_WRITE,
-                    &event.page_prot_access.h_write_page_prot_records[0],
-                    &event.page_prot_access.h_write_page_prot_records.get(1).copied(),
-                    input.public_values.is_untrusted_programs_enabled,
-                );
-            } else {
-                cols.h_read_page_prot_access = AddressSlicePageProtOperation::default();
-                cols.w_read_page_prot_access = AddressSlicePageProtOperation::default();
-                cols.h_write_page_prot_access = AddressSlicePageProtOperation::default();
             }
         });
 
@@ -257,39 +212,6 @@ where
         builder.receive(
             AirInteraction::new(receive_values, local.is_real.into(), InteractionKind::ShaCompress),
             InteractionScope::Local,
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into(),
-            &local.h_ptr.addr.map(Into::into),
-            &local.h_slice_end.value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.h_read_page_prot_access,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::one(),
-            &local.w_ptr.addr.map(Into::into),
-            &local.w_slice_end.value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.w_read_page_prot_access,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::from_canonical_u32(2),
-            &local.h_ptr.addr.map(Into::into),
-            &local.h_slice_end.value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_WRITE),
-            &local.h_write_page_prot_access,
-            local.is_real.into(),
         );
     }
 }

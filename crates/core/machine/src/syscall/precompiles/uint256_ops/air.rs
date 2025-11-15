@@ -3,7 +3,7 @@ use std::borrow::Borrow;
 use crate::{
     air::SP1CoreAirBuilder,
     memory::{MemoryAccessCols, MemoryAccessColsU8},
-    operations::{field::field_op::FieldOpCols, AddrAddOperation, AddressSlicePageProtOperation},
+    operations::{field::field_op::FieldOpCols, AddrAddOperation},
     utils::limbs_to_words,
 };
 use itertools::Itertools;
@@ -17,10 +17,7 @@ use sp1_curves::{
 };
 use sp1_derive::AlignedBorrow;
 use sp1_hypercube::{air::InteractionScope, Word};
-use sp1_primitives::{
-    consts::{PROT_READ, PROT_WRITE},
-    polynomial::Polynomial,
-};
+use sp1_primitives::polynomial::Polynomial;
 use typenum::Unsigned;
 
 use crate::operations::SyscallAddrOperation;
@@ -83,12 +80,6 @@ pub struct Uint256OpsCols<T> {
 
     /// 1 if this is a real operation, 0 otherwise.
     pub is_real: T,
-
-    pub address_slice_page_prot_access_a: AddressSlicePageProtOperation<T>,
-    pub address_slice_page_prot_access_b: AddressSlicePageProtOperation<T>,
-    pub address_slice_page_prot_access_c: AddressSlicePageProtOperation<T>,
-    pub address_slice_page_prot_access_d: AddressSlicePageProtOperation<T>,
-    pub address_slice_page_prot_access_e: AddressSlicePageProtOperation<T>,
 }
 
 impl<F> BaseAir<F> for Uint256OpsChip {
@@ -279,61 +270,6 @@ where
             &local.e_memory,
             e_result,
             local.is_real,
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into(),
-            &a_ptr.map(Into::into),
-            &local.a_addrs[WORDS_FIELD_ELEMENT - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.address_slice_page_prot_access_a,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::one(),
-            &b_ptr.map(Into::into),
-            &local.b_addrs[WORDS_FIELD_ELEMENT - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.address_slice_page_prot_access_b,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::from_canonical_u8(2),
-            &c_ptr.map(Into::into),
-            &local.c_addrs[WORDS_FIELD_ELEMENT - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_READ),
-            &local.address_slice_page_prot_access_c,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::from_canonical_u8(3),
-            &d_ptr.map(Into::into),
-            &local.d_addrs[WORDS_FIELD_ELEMENT - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_WRITE),
-            &local.address_slice_page_prot_access_d,
-            local.is_real.into(),
-        );
-
-        AddressSlicePageProtOperation::<AB::F>::eval(
-            builder,
-            local.clk_high.into(),
-            local.clk_low.into() + AB::Expr::from_canonical_u8(4),
-            &e_ptr.map(Into::into),
-            &local.e_addrs[WORDS_FIELD_ELEMENT - 1].value.map(Into::into),
-            AB::Expr::from_canonical_u8(PROT_WRITE),
-            &local.address_slice_page_prot_access_e,
-            local.is_real.into(),
         );
     }
 }
