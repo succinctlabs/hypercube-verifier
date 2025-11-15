@@ -24,7 +24,7 @@ use sp1_verifier::{ProofFromNetwork, SP1Proof};
 pub use splicing::*;
 use std::{borrow::Borrow, sync::Arc};
 use tokio::{
-    sync::{mpsc, Mutex, MutexGuard},
+    sync::{mpsc, oneshot, Mutex, MutexGuard},
     task::JoinSet,
 };
 use tracing::Instrument;
@@ -248,11 +248,18 @@ where
             }
         }
 
-        // Wait for the executor to finish
-        let result = executor.execute().await?;
-        tracing::trace!("executor finished");
+        // Spawn a task for the executor and get a result handle rx.
+        let (executor_result_tx, executor_result_rx) = oneshot::channel();
+        join_set.spawn(async move {
+            let result = executor.execute().await?;
+            tracing::trace!("executor finished");
+            executor_result_tx
+                .send(result)
+                .map_err(|_| TaskError::Fatal(anyhow::anyhow!("Controller panicked")))?;
+            Ok(())
+        });
 
-        // Wait for the proof tasks to finish
+        // Wait for the executor and proof tasks to finish
         while let Some(result) = join_set.join_next().await {
             result.map_err(|e| TaskError::Fatal(e.into()))??;
         }
@@ -275,6 +282,10 @@ where
             }
             _ => unimplemented!("proof mode not supported: {:?}", mode),
         };
+
+        let result = executor_result_rx
+            .await
+            .map_err(|_| TaskError::Fatal(anyhow::anyhow!("Executor panicked")))?;
 
         // Pair with public values and version
         let public_values = SP1PublicValues::from(&result.public_value_stream);
