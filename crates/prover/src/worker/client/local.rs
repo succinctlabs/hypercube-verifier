@@ -176,3 +176,57 @@ impl WorkerClient for LocalWorkerClient {
         Ok(SubscriberBuilder::new(self.clone(), subscriber_input_tx, subscriber_output_rx))
     }
 }
+
+#[cfg(test)]
+pub mod test_utils {
+    use std::{ops::Range, time::Duration};
+
+    use rand::Rng;
+
+    use super::*;
+
+    pub fn mock_worker_client(
+        mut random_interval: HashMap<TaskType, Range<Duration>>,
+    ) -> LocalWorkerClient {
+        let (worker_client, mut channels) = LocalWorkerClient::init();
+
+        for task_type in [
+            TaskType::Controller,
+            TaskType::SetupVkey,
+            TaskType::ProveShard,
+            TaskType::MarkerDeferredRecord,
+            TaskType::RecursionReduce,
+            TaskType::RecursionDeferred,
+            TaskType::ShrinkWrap,
+            TaskType::PlonkWrap,
+            TaskType::Groth16Wrap,
+        ] {
+            let mut rx = channels.task_receivers.remove(&task_type).unwrap();
+            let interval = random_interval.remove(&task_type).unwrap();
+            let worker_client = worker_client.clone();
+            tokio::task::spawn(async move {
+                while let Some((task_id, request)) = rx.recv().await {
+                    let client = worker_client.clone();
+                    let interval = interval.clone();
+                    tokio::spawn(async move {
+                        let duration = {
+                            let mut rng = rand::thread_rng();
+                            rng.gen_range(interval)
+                        };
+                        tokio::time::sleep(duration).await;
+                        client
+                            .complete_task(
+                                request.context.proof_id,
+                                task_id,
+                                TaskMetadata { gpu_time: None },
+                            )
+                            .await
+                            .unwrap();
+                    });
+                }
+            });
+        }
+
+        worker_client
+    }
+}
