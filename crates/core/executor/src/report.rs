@@ -30,7 +30,7 @@ pub struct ExecutionReport {
     /// The unique memory address counts.
     pub touched_memory_addresses: u64,
     /// The unnormalized gas, if it was calculated. Should not be accessed directly. Use `gas()` instead.
-    pub(crate) gas: Option<u64>,
+    pub gas: Option<u64>,
 }
 
 impl ExecutionReport {
