@@ -29,7 +29,7 @@ extern "C" rustCudaError_t sppark_init(const cudaStream_t stream) {
     uint32_t lg_domain_size = 1;
     uint32_t domain_size = 1U << lg_domain_size;
 
-    std::vector<fr_t> inout{domain_size};
+    std::vector<fr_t> inout(domain_size);
     inout[0] = fr_t(1);
     inout[1] = fr_t(1);
     try {
