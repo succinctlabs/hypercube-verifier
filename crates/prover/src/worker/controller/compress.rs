@@ -1,6 +1,6 @@
 use std::{
     collections::{BTreeMap, VecDeque},
-    sync::{Arc, Mutex},
+    sync::Arc,
 };
 
 use futures::future::try_join_all;
@@ -12,7 +12,10 @@ use sp1_hypercube::{
 use sp1_primitives::SP1GlobalContext;
 use sp1_prover_types::{Artifact, ArtifactClient, ArtifactId, ArtifactType, TaskStatus, TaskType};
 use sp1_recursion_circuit::machine::SP1ShapedWitnessValues;
-use tokio::{sync::mpsc, task::JoinSet};
+use tokio::{
+    sync::{mpsc, Mutex},
+    task::JoinSet,
+};
 use tracing::Instrument;
 
 use crate::{
@@ -293,7 +296,7 @@ impl CompressTree {
                         .map_err(|e| TaskError::Fatal(e.into()))?;
                     let proof =
                         RecursionProof { shard_range: proof_data.range, proof: proof_data.proof };
-                    core_proof_map.lock().unwrap().insert(proof_data.task_id, proof);
+                    core_proof_map.lock().await.insert(proof_data.task_id, proof);
                     num_core_proofs += 1;
                 }
                 tracing::info!(
@@ -327,6 +330,7 @@ impl CompressTree {
                         }
                     }
                 }
+                // When a core or previous compressed proof is received, send it to the proof queue.
                 Some(proof) = proof_rx.recv() => {
                     // Mark that this is a completed task.
                     pending_tasks -= 1;
@@ -394,6 +398,7 @@ impl CompressTree {
                         self.insert(proofs);
                     }
                 }
+                // When a recursion proof finishes, trigger this.
                 Some((task_id, TaskStatus::Succeeded)) = event_stream.recv() => {
                     let proof = proof_map.remove(&task_id);
                     if let Some(proof) = proof {
@@ -404,7 +409,7 @@ impl CompressTree {
                         tracing::debug!("Proof not found for task id: {}", task_id);
                     }
                 }
-
+                // When a core proof finishes, trigger this.
                 Some((task_id, status)) = core_proofs_event_stream.recv() => {
                     if status != TaskStatus::Succeeded {
                         return Err(
@@ -413,7 +418,7 @@ impl CompressTree {
                         );
                     }
                     // Download the proof
-                    let normalize_proof = core_proof_map.lock().unwrap().remove(&task_id);
+                    let normalize_proof = core_proof_map.lock().await.remove(&task_id);
                     if let Some(normalize_proof) = normalize_proof {
                         let shard_range = &normalize_proof.shard_range;
                         let (start, end) = (shard_range.start(), shard_range.end());
