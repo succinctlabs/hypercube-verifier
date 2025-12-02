@@ -90,44 +90,44 @@ cslpc-experimental = { path = "crates/prover-clean/experimental" }
 cslpc-basefold = { path = "crates/prover-clean/basefold" }
 
 # slop 
-slop-air = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-koala-bear = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-bn254 = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-basefold = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-basefold-prover = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-dft = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-matrix = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-algebra = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-symmetric = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-merkle-tree = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-poseidon2 = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-commit = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-challenger = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-multilinear = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-tensor = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-sumcheck = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-alloc = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-futures = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-stacked = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-slop-jagged = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
+slop-air = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-koala-bear = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-bn254 = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-basefold = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-basefold-prover = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-dft = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-matrix = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-algebra = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-symmetric = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-merkle-tree = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-poseidon2 = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-commit = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-challenger = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-multilinear = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-tensor = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-sumcheck = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-alloc = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-futures = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-stacked = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+slop-jagged = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
 
 # SP1
-sp1-core-machine = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-core-executor = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-hypercube = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-primitives = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-prover = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-recursion-circuit = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-recursion-compiler = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-recursion-machine = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-recursion-executor = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-curves = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-cuda = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-derive = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
-sp1-sdk = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable", features = [
+sp1-core-machine = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-core-executor = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-hypercube = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-primitives = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-prover = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-recursion-circuit = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-recursion-compiler = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-recursion-machine = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-recursion-executor = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-curves = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-cuda = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-derive = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
+sp1-sdk = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier", features = [
     "experimental",
 ] }
-sp1-prover-types = { git = "https://github.com/succinctlabs/sp1-wip.git", branch = "yuwen/rtp-stable" }
+sp1-prover-types = { git = "https://github.com/succinctlabs/hypercube-verifier.git", branch = "ethproofs_verifier" }
 
 # # slop local copy
 # slop-air = { path = "../sp1-wip/slop/crates/air" }
